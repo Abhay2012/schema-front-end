@@ -1,0 +1,32 @@
+<div class="col-sm-12" style="background-color:#4aa23a;min-height:100%;bottom:0;">
+    <div class="col-sm-7" style="padding:30px;color:white	 ">
+            
+        <h2><img   style="width: 100px;z-index: 1000;margin-left:10px" src="assets/icon.ico" alt=""> <span style="vertical-align:top"> Schema sida inloggning </span>
+        </h2>
+    </div>
+    <div class="col-sm-3" style="border:1px solid white;padding:30px;margin:40px;border-radius:10px ">
+        <ul class="nav nav-tabs nav-justified">
+            <li role="presentation">
+                <a>Logga in</a>
+            </li>
+        </ul>
+        <form #form="ngForm" style="padding-top:30px;" (submit)="login(form)">
+            <label style="color:white" for="username">Användarnamn</label>
+            <input type="text" class="form-control invalid" ngModel name="username" required>
+            
+            <br>
+            <label style="color:white" for="password">Lösenord</label>
+            <input type="password" class="form-control" ngModel name="password" required>
+            <br>
+            <div style="text-align:center">
+                <input type="submit" style="margin:auto" class="btn" [disabled]="form.invalid"  [value]="isLogin ? 'Logga in' : 'Sign up'">
+            <br>
+            <div *ngIf="loader" style="margin-top:15px">
+                <div class="loader" style="margin:auto"></div>
+            </div>
+            <p style="color:Red;padding:10px;">{{message}}</p>
+            </div>
+
+        </form>
+    </div>
+</div>

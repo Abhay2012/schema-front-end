@@ -1,0 +1,34 @@
+
+
+span.edit-symbol:hover{
+    background-color : #008080;
+    border-color : #008080 !important;
+    color:white;
+}
+
+span.delete-symbol:hover{
+    background-color : red;
+    border-color : red !important;
+    color:white;
+}
+
+.positive{
+    color:green;
+}
+
+.negative{
+    color:red;
+}
+
+
+a{
+    cursor: pointer;
+}
+/* a{
+    color : #337ab7;
+}
+
+.active{
+    background-color: #337ab7 !important;
+    color:white !important;
+} */
