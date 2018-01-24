@@ -29,6 +29,7 @@ export class UserComponent implements OnInit {
   vers: any = [];
   dels: any = [];
   spas: any = [];
+  passwordMessage: boolean = false;
   templates: any = [];
   remainingTime = [];
   showRemain: boolean = false;
@@ -46,7 +47,7 @@ export class UserComponent implements OnInit {
   edit = false;
   pasteMessage = false;
   message;
-  deleteDels=[];
+  deleteDels = [];
   users;
   weekMessage = '';
   selectedWeek = { address: '', user: '', delName: '', week: 0, spaBlock: '', timmar: null, events: [] };
@@ -75,7 +76,8 @@ export class UserComponent implements OnInit {
       element.find('.fc-event-title').html(event.title);
     },
     eventResize: (event, delta, revertFunc, jsEvent, ui, view) => {
-      this.resizeEvents(event, delta, revertFunc, true);
+      this.resizeEvents(event, delta);
+
     },
     eventClick: (event, jsEvent, view) => {
       this.selectedEvent = event;
@@ -87,8 +89,18 @@ export class UserComponent implements OnInit {
       date = date._d;
       this.eventDate = `${date.getFullYear()}-${(date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1).toString() : date.getMonth() + 1}-${(date.getDate()) < 10 ? '0' + (date.getDate()).toString() : date.getDate()}`;
     },
-    eventDrop : ( event, delta, revertFunc, jsEvent, ui, view )=>{
-      this.resizeEvents(event,delta,revertFunc, false);
+    eventDrop: (event, delta, revertFunc, jsEvent, ui, view) => {
+      var start = new Date(event.start._d.getTime() - 19800000);
+      var end = new Date(event.end._d.getTime() - 19800000);
+      console.log(end);
+      console.log(event.end._d.getTime());
+      console.log(event.end._d);
+      console.log(end.getHours());
+      if (start.getHours() < 8 || end.getHours() > 17 || (end.getHours() == 17 && end.getMinutes() > 1)) {
+        revertFunc();
+        return;
+      }
+      this.resizeEvents(event);
     },
     slotLabelFormat: "HH:mm",
     header: {
@@ -108,7 +120,7 @@ export class UserComponent implements OnInit {
     this.local = localStorage;
   }
 
-  ngOnInit(){
+  ngOnInit() {
 
     // To get Username from URL
     this.ac.params.subscribe((param) => {
@@ -150,60 +162,67 @@ export class UserComponent implements OnInit {
 
   }
 
-    // To get Data Store By admin
-    getAdminPannelData() {
-      this.selectedWeek.week = this.local.week;
-      this.us.getAdminPanel().subscribe((res: any) => {
-        res = JSON.parse(res._body);
-        for (let r of res) {
-          if (r.type == 'template') {
-            this.templates.push(r);
-          } else if (r.type == 'ver') {
-            this.vers.push(r);
-          } else if (r.type == 'spa') {
-            this.spas.push(r);
-          } else if (r.type == 'address') {
-            this.addresses.push(r);
-          } else if (r.type == 'weeks') {
-            this.weeks = r.data;
-          }
+  // To get Data Store By admin
+  getAdminPannelData() {
+    this.selectedWeek.week = this.local.week;
+    this.us.getAdminPanel().subscribe((res: any) => {
+      res = JSON.parse(res._body);
+      for (let r of res) {
+        if (r.type == 'template') {
+          this.templates.push(r);
+        } else if (r.type == 'ver') {
+          this.vers.push(r);
+        } else if (r.type == 'spa') {
+          this.spas.push(r);
+        } else if (r.type == 'address') {
+          this.addresses.push(r);
+        } else if (r.type == 'weeks') {
+          this.weeks = r.data;
         }
-        if (this.user_id != 'admin') {
-          this.getUserTemplates();
+      }
+      if (this.user_id != 'admin') {
+        this.getUserTemplates();
+      }
+      for (let address of this.addresses) {
+        //console.log(address);
+        if (address.address == this.local.address) {
+          localStorage.setItem('oppe', address.start + '-' + address.end);
+          //console.log("done");
         }
-        for(let address of this.addresses){
-          console.log(address);
-          if(address.address == this.local.address){
-            localStorage.setItem('oppe',address.start + '-' + address.end);
-            console.log("done");
-          }
-        }
-      }, (err: any) => {
-  
-      })
-    }
-    
+      }
+    }, (err: any) => {
+
+    })
+  }
+
   // To get Data Present in user
   getUserTemplates() {
     var today = new Date();
     this.us.getUserTemplates().subscribe((res: any) => {
       res = JSON.parse(res._body);
-      
+
       for (let r of res.templates) {
         this.templates.push(r);
       }
-      
-      for(let del of res.delName){
-        var start =this.dateDiffInDays(today,new Date(del.start));
-        var end = this.dateDiffInDays(today,new Date(del.end))
-          if(end<0){
-            this.deleteDels.push(del);
-          }
-          if(start <= 0 && end>0){
-            this.dels.push(del);
-          }
+
+      for (let del of res.delName) {
+        var start = this.dateDiffInDays(today, new Date(del.start));
+        var end = this.dateDiffInDays(today, new Date(del.end))
+        if (end < 0) {
+          this.deleteDels.push(del);
+        }
+        if (start <= 0 && end > 0) {
+          this.dels.push(del);
+        }
       }
-      localStorage.setItem('weekTemplate',this.dels[0].name)
+      this.templates.sort((a, b) => {
+        if (a.title < b.title) {
+          return -1;
+        } else {
+          return 1;
+        }
+      })
+      localStorage.setItem('weekTemplate', this.dels[0].name)
       this.getSelectedWeek(this.selectedWeek.week);
     }, (err: any) => {
 
@@ -218,16 +237,16 @@ export class UserComponent implements OnInit {
     this.delNames.splice(index, 1);
   }
 
-  pasteEvents(){
+  pasteEvents() {
     var obj = JSON.parse(JSON.stringify(this.selectedWeek));
     obj.week = this.copyWeek;
     // obj.name = obj.delName = this.copyDel;
-    if(obj['_id']){ 
+    if (obj['_id']) {
       delete obj['_id'];
     }
 
-    var delta = (this.copyWeek - this.selectedWeek.week)*604800000;
-    for(let event of obj.events){
+    var delta = (this.copyWeek - this.selectedWeek.week) * 604800000;
+    for (let event of obj.events) {
       var start = new Date(event.start);
       var end = new Date(event.end);
       var startVal = start.getTime() + delta;
@@ -237,14 +256,14 @@ export class UserComponent implements OnInit {
       event.end = `${end.getFullYear()}-${(end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1).toString() : end.getMonth() + 1}-${(end.getDate()) < 10 ? '0' + (end.getDate()).toString() : end.getDate()}T${end.getHours() < 10 ? '0' + end.getHours() : end.getHours()}:${end.getMinutes() < 10 ? '0' + end.getMinutes() : end.getMinutes()}`;
       event.start = `${start.getFullYear()}-${(start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1).toString() : start.getMonth() + 1}-${(start.getDate()) < 10 ? '0' + (start.getDate()).toString() : start.getDate()}T${start.getHours() < 10 ? '0' + start.getHours() : start.getHours()}:${start.getMinutes() < 10 ? '0' + start.getMinutes() : start.getMinutes()}`;
     }
-    console.log(obj.events);
-    this.us.setSelectedWeek(obj, this.copyDel).subscribe((res:any)=>{
-      console.log(res);
+    //console.log(obj.events);
+    this.us.setSelectedWeek(obj, this.copyDel).subscribe((res: any) => {
+      //console.log(res);
       this.pasteMessage = true;
       this.selectedWeek.week = this.copyWeek;
       this.selectedWeek.delName = this.copyDel;
-      this.weekTemplateChange({ target : { value : this.copyDel}});
-    }, (err:any)=>{
+      this.weekTemplateChange({ target: { value: this.copyDel } });
+    }, (err: any) => {
       this.pasteMessage = false;
     })
   }
@@ -264,38 +283,51 @@ export class UserComponent implements OnInit {
   // Update Events resized
   updateResize() {
     this.us.updateResize(this.local.week, this.updatedEvents).subscribe((res: any) => {
-      console.log(res);
+      //console.log(res);
       res = JSON.parse(res._body);
       this.showResize = true;
-      if(res.error){
-        this.resizeMessage = "Update Unsuccessful";
-                
-      }else{
-        this.resizeMessage = "Update Successful";
+      if (res.error) {
+        this.resizeMessage = "Sparning misslyckades";
+
+      } else {
+        this.resizeMessage = "Sparat";
+        for (let event = 0; event < this.events.length; event++) {
+          for (let up of this.updatedEvents) {
+            if (this.events[event].id == up.id) {
+              this.events[event].start = up.start;
+              this.events[event].end = up.end;
+              this.events[event].data.duration = up.duration;
+            }
+          }
+        }
+        _('#calendar').fullCalendar('removeEvents');
+        _('#calendar').fullCalendar('addEventSource', this.events);
+
       }
     })
   }
 
 
   // Called when events resize
-  resizeEvents(event, delta?, fn?, del?) {
+  resizeEvents(event, delta?) {
     var obj = {};
     var index = -1;
-    var start = new Date(event.start._d.getTime()-19800000);
-    var end = new Date(event.end._d.getTime()-19800000);
-    var duration = (end.getTime()-start.getTime())/3600000;
+    var start = new Date(event.start._d.getTime() - 19800000);
+    var end = new Date(event.end._d.getTime() - 19800000);
+    var duration = (end.getTime() - start.getTime()) / 3600000;
     var rduration = 0;
-    console.log(start.getHours());
-    if(start.getHours()<8){
-      fn();
-      return;
-    }
-    if(del){
+    //console.log(start.getHours());
+    // if(start.getHours()<8){
+    //   fn();
+    //   return;
+    // }
+
+    if (delta) {
       rduration = delta._data.hours + ((delta._data.minutes) / 60);
     }
-    
+
     obj['id'] = event.id;
-    
+
 
     for (let u = 0; u < this.updatedEvents.length; u++) {
       if (this.updatedEvents[u].id == event.id) {
@@ -331,13 +363,13 @@ export class UserComponent implements OnInit {
       this.updatedEvents[index].duration = duration
       this.updatedEvents[index].start = `${start.getFullYear()}-${(start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1).toString() : start.getMonth() + 1}-${(start.getDate()) < 10 ? '0' + (start.getDate()).toString() : start.getDate()}T${start.getHours() < 10 ? '0' + start.getHours() : start.getHours()}:${start.getMinutes() < 10 ? '0' + start.getMinutes() : start.getMinutes()}`;
     } else {
-      
+
       obj['end'] = `${end.getFullYear()}-${(end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1).toString() : end.getMonth() + 1}-${(end.getDate()) < 10 ? '0' + (end.getDate()).toString() : end.getDate()}T${end.getHours() < 10 ? '0' + end.getHours() : end.getHours()}:${end.getMinutes() < 10 ? '0' + end.getMinutes() : end.getMinutes()}`;
       obj['duration'] = duration;
       obj['start'] = `${start.getFullYear()}-${(start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1).toString() : start.getMonth() + 1}-${(start.getDate()) < 10 ? '0' + (start.getDate()).toString() : start.getDate()}T${start.getHours() < 10 ? '0' + start.getHours() : start.getHours()}:${start.getMinutes() < 10 ? '0' + start.getMinutes() : start.getMinutes()}`;
       this.updatedEvents.push(obj);
     }
-    console.log(this.updatedEvents);
+    //console.log(this.updatedEvents);
   }
 
   jumpDate(date) {
@@ -359,10 +391,10 @@ export class UserComponent implements OnInit {
 
   // Get Selected Week 
   getSelectedWeek(week, def?) {
-  
+
     this.weekMessage = '';
     this.jumpDate(this.getStartDate(week));
-    
+
     this.us.getSelectedWeek(this.selectedWeek.week, this.selectedWeek.user).subscribe((res: any) => {
       res = JSON.parse(res._body);
       if (res.exist) {
@@ -390,8 +422,8 @@ export class UserComponent implements OnInit {
   }
 
   weekTemplateChange(event) {
-    for(let del of this.dels){
-      if(del.name == this.selectedWeek.delName){
+    for (let del of this.dels) {
+      if (del.name == this.selectedWeek.delName) {
         this.selectedWeek.spaBlock = del.spa;
         break;
       }
@@ -403,7 +435,7 @@ export class UserComponent implements OnInit {
 
   // createWeekTemplate() {
   //   this.us.createWeekTemplate({ week: this.selectedWeek.week, name: this.weekTemplateName }).subscribe((res: any) => {
-  //     console.log(res);
+  //     //console.log(res);
   //     this.weekTemplates.push(this.weekTemplateName);
   //     this.weekTemplateName = '';
   //   }, (err: any) => {
@@ -433,10 +465,10 @@ export class UserComponent implements OnInit {
 
     var a: number = 0;
     for (let s of spa.templates) {
-      if(s.name.id == '5a575bddfd1a1d0004cb1f1b' || s.name.id == "5a576897fd1a1d0004cb1f1d"){
+      if (s.name.id == '5a575bddfd1a1d0004cb1f1b' || s.name.id == "5a576897fd1a1d0004cb1f1d") {
         a += s.hrs;
       }
-      
+
     }
     this.selectedWeek.timmar = a;
     for (let event of this.events) {
@@ -446,8 +478,8 @@ export class UserComponent implements OnInit {
         }
       }
     }
-    console.log("Remaining time");
-    console.log(this.remainingTime);
+    //console.log("Remaining time");
+    //console.log(this.remainingTime);
 
   }
 
@@ -520,47 +552,47 @@ export class UserComponent implements OnInit {
 
   // To Update Data of admin Panel by Admin 
   update(str, index) {
-    console.log(this.users);
-    console.log(index);
+    //console.log(this.users);
+    //console.log(index);
     if (str == 'user') {
-      console.log(this.users[index]);
+      //console.log(this.users[index]);
       this.us.update(this.users[index], 'updateUser').subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
       }, (err: any) => {
 
       })
     } else if (str == 'address') {
-      console.log(this.addresses[index]);
+      //console.log(this.addresses[index]);
       this.us.update(this.addresses[index]).subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
       }, (err: any) => {
 
       })
     } else if (str == 'ver') {
-      console.log(this.vers[index]);
+      //console.log(this.vers[index]);
       this.us.update(this.vers[index]).subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
       }, (err: any) => {
 
       })
     } else if (str == 'spa') {
-      console.log(this.spas[index]);
+      //console.log(this.spas[index]);
       this.us.update(this.spas[index]).subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
       }, (err: any) => {
 
       })
     } else if (str == 'temp') {
-      console.log(this.templates[index]);
+      //console.log(this.templates[index]);
       this.us.update(this.templates[index]).subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
       }, (err: any) => {
 
       })
     } else if (str == 'del') {
-      console.log(this.selectedUser.delName[index]);
+      //console.log(this.selectedUser.delName[index]);
       this.us.updateDelName(this.selectedUser.delName[index].id, this.selectedUser.delName[index]).subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
       }, (err: any) => {
 
       })
@@ -572,7 +604,7 @@ export class UserComponent implements OnInit {
     this.us.getUsers().subscribe((res: any) => {
       res = JSON.parse(res._body);
       this.message = res.message;
-      console.log(res);
+      //console.log(res);
       this.users = res;
       var index
       for (let user = 0; user < this.users.length; user++) {
@@ -582,23 +614,23 @@ export class UserComponent implements OnInit {
       }
 
       this.users.splice(index, 1);
-      // console.log(this.users);
+      // //console.log(this.users);
     }, (err: any) => {
 
     })
   }
 
-  addOpt(i,j){
+  addOpt(i, j) {
     this.templates[i].options.push("");
   }
 
-  removeOpt(i,j){
-    this.templates[i].options.splice(j,1);
+  removeOpt(i, j) {
+    this.templates[i].options.splice(j, 1);
   }
 
   // For Logout
   logout() {
-    console.log("logout");
+    //console.log("logout");
     localStorage.clear();
     this.router.navigate(['login']);
   }
@@ -606,9 +638,18 @@ export class UserComponent implements OnInit {
   // For Opening Modal For Creation from Admin Account
   createUser(id) {
     this.alreadyMessage = '';
-    console.log("ddcsd");
+    //console.log("ddcsd");
     $(id).modal('show');
 
+  }
+
+  changePassword(event) {
+    //console.log(event.value);
+    this.us.changePassword(event.value).subscribe((res: any) => {
+      this.passwordMessage = true;
+    }, (err: any) => {
+
+    })
   }
 
   // To add data from Admin Account
@@ -637,19 +678,27 @@ export class UserComponent implements OnInit {
         form.reset();
       })
     } else if (type == 'temp') {
-      // console.log(form.value);
+      // //console.log(form.value);
       if (this.user_id == 'admin') {
         form.value['options'] = this.options;
-        console.log(form.value);
+        //console.log(form.value);
         this.us.createTemplate(form.value).subscribe((res: any) => {
           this.show = true;
           res = JSON.parse(res._body);
           form.value['options'] = this.options;
           this.templates.push(form.value);
+
           this.alreadyMessage = res.message;
           this.already = res.created;
           form.reset();
           this.options = [''];
+          this.templates.sort((a, b) => {
+            if (a.title < b.title) {
+              return -1;
+            } else {
+              return 1;
+            }
+          })
         })
       } else {
         form.value['options'] = [""];
@@ -665,7 +714,7 @@ export class UserComponent implements OnInit {
       }
     } else if (type == 'spa') {
       form.value.templates = this.BlockTemplates;
-      console.log(form.value);
+      //console.log(form.value);
       this.us.createSpa(form.value).subscribe((res: any) => {
         this.show = true;
         res = JSON.parse(res._body);
@@ -677,13 +726,13 @@ export class UserComponent implements OnInit {
       })
     } else if (type == 'ver') {
 
-      console.log(form.value);
+      //console.log(form.value);
 
       this.us.createVer(form.value).subscribe((res: any) => {
         this.show = true;
         res = JSON.parse(res._body);
         this.vers.push(form.value);
-        console.log(this.vers);
+        //console.log(this.vers);
         this.alreadyMessage = res.message;
         this.already = res.created;
         form.reset();
@@ -696,35 +745,35 @@ export class UserComponent implements OnInit {
   deleteUser(user, i, type) {
     if (type == 'user') {
       this.us.deleteUser(user.username, 'User').subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
         var ind = this.users.indexOf(user);
         this.users.splice(ind, 1)
       }, (err: any) => {
       })
     } else if (type == 'address') {
       this.us.deleteUser(user._id, 'Address').subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
         var ind = this.addresses.indexOf(user);
         this.addresses.splice(ind, 1)
       }, (err: any) => {
       })
     } else if (type == 'ver') {
       this.us.deleteUser(user._id, 'Ver').subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
         var ind = this.vers.indexOf(user);
         this.spas.splice(ind, 1)
       }, (err: any) => {
       })
     } else if (type == 'spa') {
       this.us.deleteUser(user._id, 'Spa').subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
         var ind = this.spas.indexOf(user);
         this.spas.splice(ind, 1)
       }, (err: any) => {
       })
     } else if (type == 'temp') {
       this.us.deleteUser(user._id, 'Temp').subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
         var ind = this.templates.indexOf(user);
         this.templates.splice(ind, 1)
       }, (err: any) => {
@@ -732,7 +781,7 @@ export class UserComponent implements OnInit {
     } else if (type == 'del') {
 
       this.us.deleteDelName(this.selectedUser.delName[i].id).subscribe((res: any) => {
-        console.log(res);
+        //console.log(res);
         var ind = this.selectedUser.delName.indexOf(user);
         this.selectedUser.delName.splice(ind, 1);
       })
@@ -785,10 +834,10 @@ export class UserComponent implements OnInit {
         duration: duration
       }
     };
-    // console.log("checking");
-    // console.log(ev);
-    // console.log(obj);
-    // console.log(this.templates);
+    // //console.log("checking");
+    // //console.log(ev);
+    // //console.log(obj);
+    // //console.log(this.templates);
     if (ev.value.role) {
       obj.title += `\n Role : ${ev.value.role}`;
     }
@@ -806,11 +855,11 @@ export class UserComponent implements OnInit {
 
     var no_of_days = this.dateDiffInDays(new Date('2018-01-01'), new Date(ev.value.date)) + 1;
     var weekNo = Math.ceil(no_of_days / 7);
-    // console.log(weekNo);
+    // //console.log(weekNo);
 
-    // console.log(ev.value.date.getWeek())
+    // //console.log(ev.value.date.getWeek())
     this.us.addEvent(weekNo, this.user_id, obj).subscribe((res: any) => {
-      // console.log(res);
+      // //console.log(res);
       res = JSON.parse(res._body);
       this.events.push(res.data);
       this.alreadyMessage = res.message;
@@ -818,8 +867,8 @@ export class UserComponent implements OnInit {
       this.show = true;
       _('#calendar').fullCalendar('removeEvents');
       _('#calendar').fullCalendar('addEventSource', this.events);
-      // console.log("Remainni");
-      // console.log(this.remainingTime);;
+      // //console.log("Remainni");
+      // //console.log(this.remainingTime);;
       for (let r of this.remainingTime) {
         if (r.id == obj.data.id) {
           r.duration = (r.duration - obj.data.duration).toFixed(2);
@@ -833,7 +882,7 @@ export class UserComponent implements OnInit {
 
   deleteTemplate(template) {
     this.us.deleteTemplate(template.id).subscribe((res: any) => {
-      console.log(res);
+      //console.log(res);
       this.templates.splice(this.templates.indexOf(template), 1);
     }, (err: any) => {
 
@@ -844,13 +893,13 @@ export class UserComponent implements OnInit {
 
     var no_of_days = this.dateDiffInDays(new Date('2018-01-01'), new Date(this.selectedEvent['start']._d)) + 1;
     var week = Math.ceil(no_of_days / 7);
-    console.log(this.selectedEvent['id'] + week)
+    //console.log(this.selectedEvent['id'] + week)
 
-    console.log("delete function")
-    console.log(this.selectedEvent);
-    console.log(this.events);
+    //console.log("delete function")
+    //console.log(this.selectedEvent);
+    //console.log(this.events);
     this.us.deleteEvent(this.selectedEvent['id'], week).subscribe((res: any) => {
-      console.log(res);
+      //console.log(res);
       var index;
       for (let event = 0; event < this.events.length; event++) {
         if (this.events[event].id == this.selectedEvent['_id']) {
@@ -862,9 +911,9 @@ export class UserComponent implements OnInit {
       _('#calendar').fullCalendar('removeEvents');
       _('#calendar').fullCalendar('addEventSource', this.events);
       for (let r of this.remainingTime) {
-        console.log(r.id);
+        //console.log(r.id);
         if (r.id == this.selectedEvent['data']['id']) {
-          
+
           r.duration = parseInt(r.duration) + this.selectedEvent['data']['duration'];
           break;
         }
@@ -881,9 +930,9 @@ export class UserComponent implements OnInit {
     var obj = {
       notes: this.updatedNotes,
     };
-    obj['title'] = this.selectedEvent['title'].substring(0, this.selectedEvent['title'].lastIndexOf('\n')) + ' \nAnteckningar :' +  `${this.updatedNotes}`;
-    console.log(this.selectedEvent['title'].substring(0, this.selectedEvent['title'].lastIndexOf('\n')));
-    console.log(obj);
+    obj['title'] = this.selectedEvent['title'].substring(0, this.selectedEvent['title'].lastIndexOf('\n')) + ' \nAnteckningar :' + `${this.updatedNotes}`;
+    //console.log(this.selectedEvent['title'].substring(0, this.selectedEvent['title'].lastIndexOf('\n')));
+    //console.log(obj);
     var no_of_days = this.dateDiffInDays(new Date('2018-01-01'), new Date(this.selectedEvent['start']._d)) + 1;
     var week = Math.ceil(no_of_days / 7);
     this.us.updateEvent(this.selectedEvent['id'], week, obj).subscribe((res: any) => {
@@ -897,8 +946,8 @@ export class UserComponent implements OnInit {
           break;
         }
       }
-      console.log(this.selectedEvent);
-      console.log(this.events);
+      //console.log(this.selectedEvent);
+      //console.log(this.events);
       this.selectedEvent['data'].notes = this.updatedNotes;
       this.events[index].data.notes = this.updatedNotes;
       this.events[index].title = obj['title'];

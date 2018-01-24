@@ -107,4 +107,8 @@ export class UserService{
     deleteDelName(id){
         return this.http.delete(`${this.urls.url}/deleteDelName/${id}`);
     }
+
+    changePassword(data){
+        return this.http.post(`${this.urls.url}/changePassword/${localStorage.getItem('username')}`, data);
+    }
 }

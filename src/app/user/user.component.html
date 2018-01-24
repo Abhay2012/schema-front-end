@@ -1,7 +1,11 @@
 <img style="width: 60px;z-index: 1000;margin-top:10px;margin-left:10px" src="assets/icon.ico" alt="">
+<span (click)="createUser('#changePassword')" style="float:right;padding-right:40px;cursor:pointer">
+    <b> Change Password </b>
+</span>
 <span (click)="logout()" style="float:right;padding-right:40px;cursor:pointer">
     <b> Logout </b>
 </span>
+
 <div *ngIf="user_id!='admin'" class="col-sm-12" style="margin-top:10px;margin-bottom:10px" id="hide">
     <div class="col-sm-4">
         <button style="margin-left:18px" class="btn btn-primary" (click)="print()">Spara PDF</button>
@@ -135,8 +139,8 @@
                         <span *ngIf="!edit">
                             {{address.start}} - {{address.end}}
                         </span>    
-                            <input class="form-control" type="time" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].start">
-                            <input class="form-control" type="time" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].end">
+                            <input class="form-control" type="text" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].start">
+                            <input class="form-control" type="text" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].end">
                         
 
                         <br>
@@ -921,11 +925,42 @@
                         <option selected disabled value="">Select</option>
                         <option  *ngFor="let del of dels" [value]="del.name">{{del.name}}</option>
                     </select>
-                    <p *ngIf="pasteMessage" style="text-align:center;color:green">Copied Successfully</p>
+                    <p *ngIf="pasteMessage" style="text-align:center;color:green">Kopiering slutförd utan problem</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
                     <button type="button" (click)="pasteEvents()" class="btn btn-danger">Klistra in</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+    <div class="modal fade" id="changePassword" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">Change Password</h4>
+                </div>
+                <div class="modal-body">
+                    <form #changeForm =ngForm >
+                        <label for="">Current Password</label>
+                        <input type="password" class="form-control" ngModel name="oldPassword"> <br>
+                        <label for="">New Password</label>
+                        <input type="password" class="form-control" ngModel name="newPassword">
+                        <br>
+                        <input type="submit" (click)="changePassword(changeForm)" class="btn btn-primary">
+                    </form>                    
+                    <p *ngIf="passwordMessage" style="text-align:center;color:green">Password Updated</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+               
                 </div>
             </div>
             <!-- /.modal-content -->
