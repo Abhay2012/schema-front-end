@@ -55,12 +55,12 @@ export class UserComponent implements OnInit {
   selectedUser;
   eventDate;
   events = [];
+  updatedRole;
   local;
   selectedEvent = {};
   delNames = [{ name: '', spa: '', start: new Date(), end: new Date() }];
   weekTemplateName;
-  copyWeek = 0;
-  copyDel = '';
+  copyWeek = [{week : 0,del : ''}];
 
   // Calendar Object
   calendarOptions: Object = {
@@ -68,6 +68,7 @@ export class UserComponent implements OnInit {
     defaultDate: '2016-09-12',
     editable: true,
     allDaySlot: false,
+    eventTextColor : 'black',
     weekends: false,
     minTime: '08:00:00',
     maxTime: '17:00:00',
@@ -90,8 +91,8 @@ export class UserComponent implements OnInit {
       this.eventDate = `${date.getFullYear()}-${(date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1).toString() : date.getMonth() + 1}-${(date.getDate()) < 10 ? '0' + (date.getDate()).toString() : date.getDate()}`;
     },
     eventDrop: (event, delta, revertFunc, jsEvent, ui, view) => {
-      var start = new Date(event.start._d.getTime() - 19800000);
-      var end = new Date(event.end._d.getTime() - 19800000);
+      var start = new Date(event.start._d.getTime() - 3600000);
+      var end = new Date(event.end._d.getTime() - 3600000);
       console.log(end);
       console.log(event.end._d.getTime());
       console.log(event.end._d);
@@ -146,7 +147,7 @@ export class UserComponent implements OnInit {
       }
     });
 
-    //  To store week No. in local Storage
+    //  To store Current week No. in local Storage
     var no_of_days = this.dateDiffInDays(new Date('2018-01-01'), new Date()) + 1;
     localStorage.setItem('week', `${Math.ceil(no_of_days / 7)}`);
 
@@ -223,46 +224,68 @@ export class UserComponent implements OnInit {
         }
       })
       localStorage.setItem('weekTemplate', this.dels[0].name)
+      this.selectedWeek.spaBlock = this.dels[0].spa;
       this.getSelectedWeek(this.selectedWeek.week);
     }, (err: any) => {
 
     })
   }
 
-  pushDelname() {
-    this.delNames.push({ name: '', spa: '', start: new Date(), end: new Date() });
-  }
+  // Get Selected Week 
+  getSelectedWeek(week, def?) {
 
-  removeDelname(index) {
-    this.delNames.splice(index, 1);
+    this.weekMessage = '';
+
+    // To chane week in calnedar 
+    this.jumpDate(this.getStartDate(week));
+
+    // Get Data From server
+    this.us.getSelectedWeek(this.selectedWeek.week, this.selectedWeek.user).subscribe((res: any) => {
+      res = JSON.parse(res._body);
+      if (res.exist) {
+        if(res.data[0].delName==''){
+          res.data[0].delName=res.data[0].name;
+        }
+        this.selectedWeek = res.data[0];
+        this.events = res.data[0].events;
+        
+        for(let event of this.events){
+          event.title = `${event.data.title}${event.data.role ? '\n'+ event.data.role : ''}\nAnteckningar :${event.data.notes}`
+        }
+
+        _('#calendar').fullCalendar('removeEvents');
+        _('#calendar').fullCalendar('addEventSource', this.events);
+        if (this.selectedWeek.spaBlock != '') {
+          this.showRemain = true;
+          this.remainingTimeCal();
+        } else {
+          this.showRemain = false;
+        }
+        if(this.selectedWeek.address==''){
+          this.selectedWeek.address = this.local.address;
+        }
+
+      } else {
+        this.selectedWeek = { address: this.selectedWeek.address, user: this.selectedWeek.user, delName: this.selectedWeek.delName, week: this.selectedWeek.week, spaBlock: this.selectedWeek.spaBlock, timmar: '', events: [] };
+        this.showRemain = false;
+        this.events = [];
+        _('#calendar').fullCalendar('removeEvents');
+        _('#calendar').fullCalendar('addEventSource', this.events);
+        this.remainingTimeCal();
+      }
+    })
   }
 
   pasteEvents() {
-    var obj = JSON.parse(JSON.stringify(this.selectedWeek));
-    obj.week = this.copyWeek;
-    // obj.name = obj.delName = this.copyDel;
-    if (obj['_id']) {
-      delete obj['_id'];
-    }
-
-    var delta = (this.copyWeek - this.selectedWeek.week) * 604800000;
-    for (let event of obj.events) {
-      var start = new Date(event.start);
-      var end = new Date(event.end);
-      var startVal = start.getTime() + delta;
-      var endVal = end.getTime() + delta;
-      end = new Date(endVal);
-      start = new Date(startVal);
-      event.end = `${end.getFullYear()}-${(end.getMonth() + 1) < 10 ? '0' + (end.getMonth() + 1).toString() : end.getMonth() + 1}-${(end.getDate()) < 10 ? '0' + (end.getDate()).toString() : end.getDate()}T${end.getHours() < 10 ? '0' + end.getHours() : end.getHours()}:${end.getMinutes() < 10 ? '0' + end.getMinutes() : end.getMinutes()}`;
-      event.start = `${start.getFullYear()}-${(start.getMonth() + 1) < 10 ? '0' + (start.getMonth() + 1).toString() : start.getMonth() + 1}-${(start.getDate()) < 10 ? '0' + (start.getDate()).toString() : start.getDate()}T${start.getHours() < 10 ? '0' + start.getHours() : start.getHours()}:${start.getMinutes() < 10 ? '0' + start.getMinutes() : start.getMinutes()}`;
-    }
-    //console.log(obj.events);
-    this.us.setSelectedWeek(obj, this.copyDel).subscribe((res: any) => {
+    var obj={};
+    obj['selectedWeek'] = JSON.parse(JSON.stringify(this.selectedWeek));
+    obj['copyWeek'] = this.copyWeek;
+    this.us.copyCalendar(obj, this.copyWeek[0].del).subscribe((res: any) => {
       //console.log(res);
       this.pasteMessage = true;
-      this.selectedWeek.week = this.copyWeek;
-      this.selectedWeek.delName = this.copyDel;
-      this.weekTemplateChange({ target: { value: this.copyDel } });
+      this.selectedWeek.week = this.copyWeek[0].week;
+      this.selectedWeek.delName = this.copyWeek[0].del;
+      this.weekTemplateChange({ target: { value: this.copyWeek[0].del } });
     }, (err: any) => {
       this.pasteMessage = false;
     })
@@ -282,7 +305,7 @@ export class UserComponent implements OnInit {
 
   // Update Events resized
   updateResize() {
-    this.us.updateResize(this.local.week, this.updatedEvents).subscribe((res: any) => {
+    this.us.updateResize(this.local.week,this.selectedWeek['_id'], this.updatedEvents).subscribe((res: any) => {
       //console.log(res);
       res = JSON.parse(res._body);
       this.showResize = true;
@@ -312,8 +335,8 @@ export class UserComponent implements OnInit {
   resizeEvents(event, delta?) {
     var obj = {};
     var index = -1;
-    var start = new Date(event.start._d.getTime() - 19800000);
-    var end = new Date(event.end._d.getTime() - 19800000);
+    var start = new Date(event.start._d.getTime() - 3600000);
+    var end = new Date(event.end._d.getTime() - 3600000);
     var duration = (end.getTime() - start.getTime()) / 3600000;
     var rduration = 0;
     //console.log(start.getHours());
@@ -389,37 +412,6 @@ export class UserComponent implements OnInit {
     this.options.splice(i, 1);
   }
 
-  // Get Selected Week 
-  getSelectedWeek(week, def?) {
-
-    this.weekMessage = '';
-    this.jumpDate(this.getStartDate(week));
-
-    this.us.getSelectedWeek(this.selectedWeek.week, this.selectedWeek.user).subscribe((res: any) => {
-      res = JSON.parse(res._body);
-      if (res.exist) {
-        this.selectedWeek = res.data[0];
-        this.events = res.data[0].events;
-
-        _('#calendar').fullCalendar('removeEvents');
-        _('#calendar').fullCalendar('addEventSource', this.events);
-        if (this.selectedWeek.spaBlock != '') {
-          this.showRemain = true;
-          this.remainingTimeCal();
-        } else {
-          this.showRemain = false;
-        }
-
-      } else {
-        this.selectedWeek = { address: this.selectedWeek.address, user: this.selectedWeek.user, delName: this.selectedWeek.delName, week: this.selectedWeek.week, spaBlock: this.selectedWeek.spaBlock, timmar: '', events: [] };
-        this.showRemain = false;
-        this.events = [];
-        _('#calendar').fullCalendar('removeEvents');
-        _('#calendar').fullCalendar('addEventSource', this.events);
-        this.remainingTimeCal();
-      }
-    })
-  }
 
   weekTemplateChange(event) {
     for (let del of this.dels) {
@@ -445,10 +437,12 @@ export class UserComponent implements OnInit {
 
   remainingTimeCal() {
     var spa;
-
+    console.log(this.selectedWeek);
     for (let s of this.spas) {
+      
       if (s.code == this.selectedWeek.spaBlock) {
         spa = s;
+        
         this.showRemain = true;
         for (let temp = 0; temp < spa.templates.length; temp++) {
           this.remainingTime[temp] = {
@@ -461,15 +455,19 @@ export class UserComponent implements OnInit {
         break;
       }
     }
-
+    
 
     var a: number = 0;
-    for (let s of spa.templates) {
-      if (s.name.id == '5a575bddfd1a1d0004cb1f1b' || s.name.id == "5a576897fd1a1d0004cb1f1d") {
-        a += s.hrs;
+    if(spa){
+      for (let s of spa.templates) {
+        if (s.name.id == '5a575bddfd1a1d0004cb1f1b' || s.name.id == "5a576897fd1a1d0004cb1f1d") {
+          a += s.hrs;
+        }
+  
       }
-
     }
+    
+
     this.selectedWeek.timmar = a;
     for (let event of this.events) {
       for (let r of this.remainingTime) {
@@ -637,10 +635,10 @@ export class UserComponent implements OnInit {
 
   // For Opening Modal For Creation from Admin Account
   createUser(id) {
+    this.editEvent = false;
     this.alreadyMessage = '';
     //console.log("ddcsd");
     $(id).modal('show');
-
   }
 
   changePassword(event) {
@@ -823,7 +821,7 @@ export class UserComponent implements OnInit {
 
 
     var obj = {
-      title: `${ev.value.template.title}  `,
+      title: `${ev.value.template.title}  \n`,
       color: `${ev.value.template.color}`,
       start: `${ev.value.date}T${ev.value.startTime}`,
       end: `${ev.value.date}T${ev.value.endTime}`,
@@ -839,11 +837,11 @@ export class UserComponent implements OnInit {
     // //console.log(obj);
     // //console.log(this.templates);
     if (ev.value.role) {
-      obj.title += `\n Role : ${ev.value.role}`;
+      obj.title += `\n ${ev.value.role}`;
     }
 
     if (ev.value.notes) {
-      obj.title += `\n Notes : ${ev.value.notes}`;
+      obj.title += `\n Anteckningar : ${ev.value.notes}`;
     }
 
     if (ev.value.role) {
@@ -898,7 +896,7 @@ export class UserComponent implements OnInit {
     //console.log("delete function")
     //console.log(this.selectedEvent);
     //console.log(this.events);
-    this.us.deleteEvent(this.selectedEvent['id'], week).subscribe((res: any) => {
+    this.us.deleteEvent(this.selectedEvent['id'],this.selectedWeek['_id'], week).subscribe((res: any) => {
       //console.log(res);
       var index;
       for (let event = 0; event < this.events.length; event++) {
@@ -927,15 +925,11 @@ export class UserComponent implements OnInit {
   updateEvent() {
     this.show = false;
 
-    var obj = {
-      notes: this.updatedNotes,
-    };
-    obj['title'] = this.selectedEvent['title'].substring(0, this.selectedEvent['title'].lastIndexOf('\n')) + ' \nAnteckningar :' + `${this.updatedNotes}`;
-    //console.log(this.selectedEvent['title'].substring(0, this.selectedEvent['title'].lastIndexOf('\n')));
-    //console.log(obj);
+    var obj = this.selectedEvent['data'];
+    console.log(this.selectedEvent);
     var no_of_days = this.dateDiffInDays(new Date('2018-01-01'), new Date(this.selectedEvent['start']._d)) + 1;
     var week = Math.ceil(no_of_days / 7);
-    this.us.updateEvent(this.selectedEvent['id'], week, obj).subscribe((res: any) => {
+    this.us.updateEvent(this.selectedEvent['id'],this.selectedWeek['_id'], week, obj).subscribe((res: any) => {
       res = JSON.parse(res._body);
       this.show = true;
       this.editEvent = false;
@@ -948,13 +942,38 @@ export class UserComponent implements OnInit {
       }
       //console.log(this.selectedEvent);
       //console.log(this.events);
-      this.selectedEvent['data'].notes = this.updatedNotes;
-      this.events[index].data.notes = this.updatedNotes;
-      this.events[index].title = obj['title'];
+      
+      this.events[index].title = obj['title'] + `${'role' in obj? '\n'+obj.role : ''}'\n'Anteckningar : ${obj.notes}`;
       _('#calendar').fullCalendar('removeEvents');
       _('#calendar').fullCalendar('addEventSource', this.events);
       this.alreadyMessage = res.message;
       this.already = !res.error;
+    })
+  }
+
+  pushDelname() {
+    this.delNames.push({ name: '', spa: '', start: new Date(), end: new Date() });
+  }
+
+  removeDelname(index) {
+    this.delNames.splice(index, 1);
+  }
+
+  addWeek(){
+    this.copyWeek.push({week : 0, del : ''});
+  }
+
+  removeWeek(index){
+    this.copyWeek.splice(index,1);
+  }
+
+  copyDels(form){
+    console.log(form.value)
+    this.us.postDelName(form.value.to.username, form.value.from.delName).subscribe((res:any)=>{
+      this.pasteMessage = true;
+      form.value.to.delName = form.value.from.delName;
+    },(err:any)=>{
+
     })
   }
 

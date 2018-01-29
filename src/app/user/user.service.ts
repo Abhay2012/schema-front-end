@@ -56,7 +56,9 @@ export class UserService{
     }
 
     getSelectedWeek(week,user){
-        return this.http.get(`${this.urls.url}/getCalendarData/${week}/${user}/${localStorage.getItem('weekTemplate')}`)
+        if(localStorage.getItem('weekTemplate')){
+            return this.http.get(`${this.urls.url}/getCalendarData/${week}/${user}/${localStorage.getItem('weekTemplate')}`)
+        }
     }
 
     setSelectedWeek(data, del?){
@@ -73,6 +75,12 @@ export class UserService{
         }
     }
 
+    copyCalendar(data, del){
+        data.name = del;
+        data.delName = del;
+        return this.http.post(`${this.urls.url}/copyCalendarData`, data);
+    }
+
     addEvent(week,user,data){
         return this.http.post(`${this.urls.url}/addEvent/${week}/${user}/${localStorage.getItem('weekTemplate')}`,data)
     }
@@ -81,16 +89,16 @@ export class UserService{
         return this.http.delete(`${this.urls.url}/deleteTemplate/${id}`);
     }
 
-    deleteEvent(id,week){
-        return this.http.delete(`${this.urls.url}/deleteEvent/${id}/${week}`)
+    deleteEvent(id,wId,week){
+        return this.http.delete(`${this.urls.url}/deleteEvent/${id}/${wId}/${week}`)
     }
 
-    updateEvent(id,week,data){
-        return this.http.post(`${this.urls.url}/updateEvent/${id}/${week}`,data);
+    updateEvent(id,wId,week,data){
+        return this.http.post(`${this.urls.url}/updateEvent/${id}/${wId}/${week}`,data);
     }
 
-    updateResize(week, data){
-        return this.http.post(`${this.urls.url}/updateResize/${week}`,data);
+    updateResize(week,wId, data){
+        return this.http.post(`${this.urls.url}/updateResize/${wId}/${week}`,data);
     }
 
     createWeekTemplate(data){

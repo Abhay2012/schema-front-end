@@ -20,7 +20,7 @@
                 </option>
             </select>
         </div>
-        
+
     </div>
 
     <!-- <button class="btn" (click)="fun()">click</button> -->
@@ -134,14 +134,13 @@
                     <div class="col-sm-7">
                         <span *ngIf="!edit"> {{address.address}} </span>
                         <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="addresses[i].address">
-                        <br>
-                        Open Hours :
+                        <br> Open Hours :
                         <span *ngIf="!edit">
                             {{address.start}} - {{address.end}}
-                        </span>    
-                            <input class="form-control" type="text" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].start">
-                            <input class="form-control" type="text" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].end">
-                        
+                        </span>
+                        <input class="form-control" type="text" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].start">
+                        <input class="form-control" type="text" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].end">
+
 
                         <br>
                         <button *ngIf="edit" class="btn btn-primary" (click)="update('address',i)">Save</button>
@@ -297,12 +296,12 @@
                             <span *ngIf="!edit"> {{option}} </span>
                             <span *ngIf="edit">
                                 <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="templates[i].options[j]">
-                                <span *ngIf="template.options.length > 1" class="glyphicon glyphicon-remove" (click)="removeOpt(i,j)" ></span>
+                                <span *ngIf="template.options.length > 1" class="glyphicon glyphicon-remove" (click)="removeOpt(i,j)"></span>
                                 <br>
                             </span>
                             <br>
                         </span>
-                        <span *ngIf="edit" class="glyphicon glyphicon-plus" (click)="addOpt(i,j)" ></span>
+                        <span *ngIf="edit" class="glyphicon glyphicon-plus" (click)="addOpt(i,j)"></span>
                         <br>
                         <br>
                         <button *ngIf="edit" class="btn btn-primary" (click)="update('temp',i)">Save</button>
@@ -320,11 +319,13 @@
         </div>
         <div style="padding:25px" *ngIf="tab==6">
             <label for="">Select User</label>
+            <button class="btn btn-primary" style="float:right" (click)="createUser('#copyDel')">Kopiera</button>
             <select style="width:50%" [(ngModel)]="selectedUser" class="form-control">
                 <!-- <option selected disabled value="">Select</option> -->
                 <option *ngFor="let user of users" [ngValue]="user">{{user.username}}</option>
             </select>
             <br>
+            
             <ul class="list-group" *ngIf="selectedUser">
                 <li class="list-group-item" style="overflow: hidden" *ngFor="let del of delNames;let i=index">
                     <div class="col-sm-3">
@@ -346,9 +347,9 @@
                         <label for="">End</label>
                         <input type="date" class="form-control" [(ngModel)]="delNames[i].end">
                     </div>
-                    <span *ngIf="delNames.length>1" class="glyphicon glyphicon-remove" style="float:right" (click)="removeDelname()" ></span>
+                    <span *ngIf="delNames.length>1" class="glyphicon glyphicon-remove" style="float:right" (click)="removeDelname()"></span>
                 </li>
-                <span class="glyphicon glyphicon-plus" (click)="pushDelname()" ></span>
+                <span class="glyphicon glyphicon-plus" (click)="pushDelname()"></span>
             </ul>
             <button *ngIf="selectedUser" class="btn btn-primary" [disabled]="selectedUser == {}" (click)="postDelname()"> Submit</button>
             <ul class="list-group" *ngIf="selectedUser">
@@ -404,7 +405,7 @@
         <div style="max-height:300px;border:1px solid black;overflow:auto; border-radius:5px;">
             <!-- <h4 style="text-align:center;">Templates</h4> -->
             <ul class="list-group" style="padding:10px">
-                <li class="list-group-item" *ngFor="let template of templates" style="color:white" [style.backgroundColor]="template.color">
+                <li class="list-group-item" *ngFor="let template of templates" style="color:black" [style.backgroundColor]="template.color">
                     {{template.title}}
                     <span *ngIf="template.user" style="float:right;color:white" (click)="deleteTemplate(template)" class="glyphicon glyphicon-trash"></span>
                     <!-- <span *ngIf="template">
@@ -449,11 +450,11 @@
                         <td>Deltagarens namn : </td>
                         <td>
                             {{selectedWeek.delName}}
-                        <!-- <select [(ngModel)]="selectedWeek.delName"  class="form-control">
+                            <!-- <select [(ngModel)]="selectedWeek.delName"  class="form-control">
                             <option selected disabled value="">Select</option>
                             <option *ngFor="let del of dels" [value]="del.name">{{del.name}}</option>
                         </select> -->
-                    </td>
+                        </td>
                     </tr>
                     <tr>
                         <td>Vecka : </td>
@@ -605,7 +606,8 @@
                     <label for="address">Address</label>
                     <input type="text" class="form-control" ngModel name="address">
                     <br>
-                    <b> Open Hours : </b> <br>
+                    <b> Open Hours : </b>
+                    <br>
                     <label for="">Start</label>
                     <input type="text" class="form-control" ngModel name="start">
                     <br>
@@ -877,15 +879,24 @@
                 <h4 *ngIf="selectedEvent['data']" class="modal-title">{{selectedEvent['data']['title']}}</h4>
             </div>
             <div class="modal-body">
-                <b *ngIf="selectedEvent['data'] && selectedEvent['data']['role']">Role :</b>
+                <b>Role :</b>
+                <div *ngIf="editEvent">
+                    <div *ngFor="let temp of templates">
+                        <span *ngIf="temp.title == selectedEvent.data.title.trim()">
+                            <select [(ngModel)]="selectedEvent['data']['role']" class="form-control">
+                                <option *ngFor="let op of temp.options" [value]="op">{{op}}</option>
+                            </select>
+                        </span>
+                    </div>
+                </div>
                 <!-- <br *ngIf="selectedEvent.data && selectedEvent.data.role"> -->
-                <span *ngIf="selectedEvent['data'] && selectedEvent['data']['role']"> {{selectedEvent['data']['role']}} </span>
+                <span *ngIf="selectedEvent['data'] && selectedEvent['data']['role'] && !editEvent"> {{selectedEvent['data']['role']}} </span>
                 <br>
                 <b>Anteckningar :</b>
                 <span (click)="editEvent = true" class="glyphicon glyphicon-pencil"></span>
                 <br>
                 <span *ngIf="selectedEvent['data'] && selectedEvent['data']['notes'] && !editEvent"> {{selectedEvent['data']['notes']}} </span>
-                <textarea *ngIf="editEvent" class="form-control" [(ngModel)]="updatedNotes">
+                <textarea *ngIf="editEvent" class="form-control" [(ngModel)]="selectedEvent['data']['notes']">
 
                 </textarea>
                 <br>
@@ -906,65 +917,107 @@
 <!-- /.modal -->
 
 <div class="modal fade" id="copyEvents" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title">Copied!</h4>
-                </div>
-                <div class="modal-body">
-                    <label for="">Select Week  : </label>
-                    <select class="form-control" (click)="pasteMessage=false" [(ngModel)]="copyWeek" >
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Copied!</h4>
+            </div>
+            <div class="modal-body">
+                <div *ngFor="let c of copyWeek;let i = index">
+                    <label for="">Select Week : </label>
+                    <select class="form-control" (click)="pasteMessage=false" [(ngModel)]="copyWeek[i].week">
                         <option selected disabled value="0">Select</option>
-                        <option  *ngFor="let week of weeks" [value]="week">{{week}}</option>
+                        <option *ngFor="let week of weeks" [value]="week">{{week}}</option>
                     </select>
                     <label for="">Select Deltagarens namn : </label>
-                    <select class="form-control" (click)="pasteMessage=false" [(ngModel)]="copyDel" >
+                    <select class="form-control" (click)="pasteMessage=false" [(ngModel)]="copyWeek[i].del">
                         <option selected disabled value="">Select</option>
-                        <option  *ngFor="let del of dels" [value]="del.name">{{del.name}}</option>
+                        <option *ngFor="let del of dels" [value]="del.name">{{del.name}}</option>
                     </select>
-                    <p *ngIf="pasteMessage" style="text-align:center;color:green">Kopiering slutförd utan problem</p>
+                    <span class="glyphicon glyphicon-remove" (click)="removeWeek(i)" *ngIf="copyWeek.length>1"></span>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
-                    <button type="button" (click)="pasteEvents()" class="btn btn-danger">Klistra in</button>
-                </div>
+                <span class="glyphicon glyphicon-plus" (click)="addWeek()"></span>
+                <p *ngIf="pasteMessage" style="text-align:center;color:green">Kopiering slutförd utan problem</p>
             </div>
-            <!-- /.modal-content -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <button type="button" (click)="pasteEvents()" class="btn btn-danger">Klistra in</button>
+            </div>
         </div>
-        <!-- /.modal-dialog -->
+        <!-- /.modal-content -->
     </div>
-    <!-- /.modal -->
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
 
-    <div class="modal fade" id="changePassword" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title">Change Password</h4>
-                </div>
-                <div class="modal-body">
-                    <form #changeForm =ngForm >
-                        <label for="">Current Password</label>
-                        <input type="password" class="form-control" ngModel name="oldPassword"> <br>
-                        <label for="">New Password</label>
-                        <input type="password" class="form-control" ngModel name="newPassword">
-                        <br>
-                        <input type="submit" (click)="changePassword(changeForm)" class="btn btn-primary">
-                    </form>                    
-                    <p *ngIf="passwordMessage" style="text-align:center;color:green">Password Updated</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
-               
-                </div>
+<div class="modal fade" id="changePassword" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Change Password</h4>
             </div>
-            <!-- /.modal-content -->
+            <div class="modal-body">
+                <form #changeForm=ngForm>
+                    <label for="">Current Password</label>
+                    <input type="password" class="form-control" ngModel name="oldPassword">
+                    <br>
+                    <label for="">New Password</label>
+                    <input type="password" class="form-control" ngModel name="newPassword">
+                    <br>
+                    <input type="submit" (click)="changePassword(changeForm)" class="btn btn-primary">
+                </form>
+                <p *ngIf="passwordMessage" style="text-align:center;color:green">Password Updated</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+
+            </div>
         </div>
-        <!-- /.modal-dialog -->
+        <!-- /.modal-content -->
     </div>
-    <!-- /.modal -->
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="copyDel" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Copied!</h4>
+            </div>
+            <div class="modal-body">
+                <form #copy=ngForm>
+                    <label for="">From :</label>
+                    <select ngModel name="from" class="form-control">
+                        <!-- <option selected disabled value="">Select</option> -->
+                        <option *ngFor="let user of users" [ngValue]="user">{{user.username}}</option>
+                    </select>
+                    <label for="">To :</label>
+                    <select ngModel name="to" class="form-control">
+                        <!-- <option selected disabled value="">Select</option> -->
+                        <option *ngFor="let user of users" [ngValue]="user">{{user.username}}</option>
+                    </select>
+                    <button type="button" (click)="copyDels(copy)" class="btn btn-warning">Klistra in</button>
+                </form>
+
+
+                <p *ngIf="pasteMessage" style="text-align:center;color:green">Kopiering slutförd utan problem</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
