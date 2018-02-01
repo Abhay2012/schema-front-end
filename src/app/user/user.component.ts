@@ -29,6 +29,7 @@ export class UserComponent implements OnInit {
   vers: any = [];
   dels: any = [];
   spas: any = [];
+  fromDels = [];
   passwordMessage: boolean = false;
   templates: any = [];
   remainingTime = [];
@@ -55,12 +56,14 @@ export class UserComponent implements OnInit {
   selectedUser;
   eventDate;
   events = [];
+  grantMessage = '';
   updatedRole;
   local;
   selectedEvent = {};
   delNames = [{ name: '', spa: '', start: new Date(), end: new Date() }];
   weekTemplateName;
   copyWeek = [{week : 0,del : ''}];
+  timeLeft=0;
 
   // Calendar Object
   calendarOptions: Object = {
@@ -69,6 +72,7 @@ export class UserComponent implements OnInit {
     editable: true,
     allDaySlot: false,
     eventTextColor : 'black',
+    eventOverlap :  false,
     weekends: false,
     minTime: '08:00:00',
     maxTime: '17:00:00',
@@ -118,6 +122,7 @@ export class UserComponent implements OnInit {
 
   constructor(private ac: ActivatedRoute, private us: UserService, private router: Router) {
     this.selectedWeek.delName = localStorage.getItem('weekTemplate');
+    localStorage.setItem('grant_access','false');
     this.local = localStorage;
   }
 
@@ -293,10 +298,13 @@ export class UserComponent implements OnInit {
 
   postDelname() {
     this.us.postDelName(this.selectedUser['username'], this.delNames).subscribe((res: any) => {
-
-      for (let del of this.delNames) {
-        this.selectedUser.delName.push(del);
+      console.log(res);
+      res = JSON.parse(res._body);
+      console.log(this.selectedUser.delName.concat(res.dels));
+      if('dels' in res){
+        this.selectedUser.delName = this.selectedUser.delName.concat(res.dels);
       }
+
       this.delNames = [{ name: '', spa: '', start: new Date(), end: new Date() }];
     }, (err: any) => {
 
@@ -327,6 +335,10 @@ export class UserComponent implements OnInit {
         _('#calendar').fullCalendar('addEventSource', this.events);
 
       }
+
+      setTimeout(()=>{
+        this.resizeMessage = '';
+      },2000)
     })
   }
 
@@ -486,6 +498,9 @@ export class UserComponent implements OnInit {
       this.us.setSelectedWeek(this.selectedWeek).subscribe((res: any) => {
         res = JSON.parse(res._body);
         this.weekMessage = res.message;
+        setTimeout(()=>{
+          this.weekMessage = '';
+        },2000)
       }, (err: any) => {
 
       })
@@ -524,7 +539,7 @@ export class UserComponent implements OnInit {
           format: 'a4'
         });
         doc.addImage(img, 'JPEG', 20, 20, 400, 380);
-        doc.save('test.pdf');
+        doc.save(`${localStorage.getItem('weekTemplate')}  schema.pdf`);
         document.body.style.width = '100%';
         document.body.style.height = '100%';
       }
@@ -538,7 +553,7 @@ export class UserComponent implements OnInit {
         var img = canvas.toDataURL("image/png");
         var doc = new jsPDF('l', 'mm', [297, 210]);
         doc.addImage(img, 'JPEG', 20, 20, 220, 180);
-        doc.save('test.pdf');
+        doc.save(`${localStorage.getItem('weekTemplate')}  schema.pdf`);
         document.body.style.width = '100%';
         document.body.style.height = '100%';
       }
@@ -967,14 +982,60 @@ export class UserComponent implements OnInit {
     this.copyWeek.splice(index,1);
   }
 
+  getAccess(form){
+    form.value.username = 'admin';
+    this.us.getAccess(form.value).subscribe((res:any)=>{
+      res = JSON.parse(res._body);
+      if(!res.error){
+        this.grantMessage = 'Access Granted';
+        this.local.setItem('grant_access','true');
+      }else{
+        this.grantMessage = 'Only Admin Can Use These Features';
+      }
+    },(er:any)=>{
+
+    })
+  }
+
   copyDels(form){
     console.log(form.value)
-    this.us.postDelName(form.value.to.username, form.value.from.delName).subscribe((res:any)=>{
+    this.us.moveDelName(form.value.to.username,form.value.from.username, this.fromDels).subscribe((res:any)=>{
       this.pasteMessage = true;
-      form.value.to.delName = form.value.from.delName;
+      form.value.to.delName = form.value.to.delName.concat(this.fromDels);
+      for(let del of this.fromDels){
+        form.value.from.delName.splice(form.value.from.delName.indexOf(del),1)  
+      }
+      form.value.from.delName
     },(err:any)=>{
 
     })
+  }
+
+  showDels(from){
+    this.fromDels = JSON.parse(JSON.stringify( from.value.from.delName));
+    console.log(this.fromDels);
+  }
+
+  addRemoveDel(i){
+    this.fromDels.splice(i,1); 
+  }
+
+  printWarning(id){
+    
+    for(let r of this.remainingTime){
+      this.timeLeft += parseFloat(r.duration);
+    }
+    if(this.timeLeft > 0){
+      $(id).modal('show');
+    }else{
+      if(id == '#potraitPdf'){
+        this.print();
+      }else{
+        this.printLandscape();
+      }
+    }
+    console.log(this.timeLeft);
+
   }
 
 }

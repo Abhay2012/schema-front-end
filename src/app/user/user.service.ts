@@ -108,6 +108,9 @@ export class UserService{
     postDelName(username, data){
         return this.http.post(`${this.urls.url}/createDelName/${username}`,data);
     }
+    moveDelName(username,username1,data){
+        return this.http.post(`${this.urls.url}/moveDelName/${username}/${username1}`,data);
+    }
     updateDelName(id, data){
         return this.http.post(`${this.urls.url}/updateDelName/${id}`,data);
     }
@@ -118,5 +121,10 @@ export class UserService{
 
     changePassword(data){
         return this.http.post(`${this.urls.url}/changePassword/${localStorage.getItem('username')}`, data);
+    }
+
+    getAccess(data){
+        // var options : RequestOptions = { 'Content-Type' : "application/json"}
+        return this.http.post(this.urls.url + `/login`, data)
     }
 }

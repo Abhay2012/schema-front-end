@@ -1,4 +1,5 @@
 <img style="width: 60px;z-index: 1000;margin-top:10px;margin-left:10px" src="assets/icon.ico" alt="">
+<button *ngIf="user_id!='admin'" class="btn btn-primary" (click)="createUser('#getAccess')">Get Access</button>
 <span (click)="createUser('#changePassword')" style="float:right;padding-right:40px;cursor:pointer">
     <b> Change Password </b>
 </span>
@@ -8,8 +9,8 @@
 
 <div *ngIf="user_id!='admin'" class="col-sm-12" style="margin-top:10px;margin-bottom:10px" id="hide">
     <div class="col-sm-4">
-        <button style="margin-left:18px" class="btn btn-primary" (click)="print()">Spara PDF</button>
-        <button class="btn btn-primary" (click)="printLandscape()">Spara PDF (Landscape)</button>
+        <button style="margin-left:18px" class="btn btn-primary" (click)="printWarning('#potraitPdf')">Spara PDF</button>
+        <button class="btn btn-primary" (click)="printWarning('#landscapePdf')">Spara PDF (Landscape)</button>
     </div>
     <div *ngIf="!createTemp" class="col-sm-8">
         <div class="col-sm-5">
@@ -319,13 +320,13 @@
         </div>
         <div style="padding:25px" *ngIf="tab==6">
             <label for="">Select User</label>
-            <button class="btn btn-primary" style="float:right" (click)="createUser('#copyDel')">Kopiera</button>
+            <button class="btn btn-primary" style="float:right" (click)="createUser('#copyDel')">Flytta</button>
             <select style="width:50%" [(ngModel)]="selectedUser" class="form-control">
                 <!-- <option selected disabled value="">Select</option> -->
                 <option *ngFor="let user of users" [ngValue]="user">{{user.username}}</option>
             </select>
             <br>
-            
+
             <ul class="list-group" *ngIf="selectedUser">
                 <li class="list-group-item" style="overflow: hidden" *ngFor="let del of delNames;let i=index">
                     <div class="col-sm-3">
@@ -415,7 +416,7 @@
                         </select>
                     </span> -->
                 </li>
-                <li class="list-group-item" (click)="createUser('#createTemp')">
+                <li *ngIf="local.grant_access != 'false'" class="list-group-item" (click)="createUser('#createTemp')">
                     <span class="glyphicon glyphicon-plus"></span> Add Template
                 </li>
 
@@ -470,7 +471,8 @@
                     <tr>
                         <td>SpårOchBlock : </td>
                         <td>
-                            <select class="form-control" [(ngModel)]="selectedWeek.spaBlock" (change)="remainingTimeCal()">
+                            <span *ngIf="local.grant_access == 'false'">{{selectedWeek.spaBlock}}</span>
+                            <select *ngIf="local.grant_access != 'false'" class="form-control" [(ngModel)]="selectedWeek.spaBlock" (change)="remainingTimeCal()">
                                 <option selected disabled value="">Select</option>
                                 <option *ngFor="let spa of spas" [value]="spa.code">
                                     {{spa.code}}
@@ -509,7 +511,7 @@
 
             <button class="btn btn-primary" [disabled]="this.selectedWeek.spaBlock == '' || selectedWeek.delName == '' || this.selectedWeek.address == ''"
                 style="float:right;margin:10px" (click)="setSelectedWeek()">Spara uppgifter</button>
-            <span style="float:right;margin-top:20px">{{weekMessage}}</span>
+            <span style="float:right;margin-top:20px" [style.color]="weekMessage == 'Sparat'? 'green':'red'">{{weekMessage}}</span>
         </div>
 
         <!-- <br> -->
@@ -525,12 +527,12 @@
                     {{r.title}} : {{r.duration}}
                 </span>
             </span>
-            <span style="float:right;color:red" *ngIf="showResize">
-                *{{resizeMessage}}
+            <span style="float:right;" [style.color]="resizeMessage == 'Sparat'? 'green':'red'" *ngIf="showResize">
+                {{resizeMessage}}
             </span>
         </div>
         <button class="btn btn-primary" (click)="updateResize()">Spara</button>
-        <button class="btn btn-primary" (click)="createUser('#copyEvents')">Kopiera</button>
+        <button class="btn btn-primary" *ngIf="local.grant_access != 'false'" (click)="createUser('#copyEvents')">Kopiera</button>
         <br>
         <br>
         <angular2-fullcalendar id="calendar" [options]="calendarOptions"></angular2-fullcalendar>
@@ -992,21 +994,28 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title">Copied!</h4>
+                <h4 class="modal-title">Flytta</h4>
             </div>
             <div class="modal-body">
                 <form #copy=ngForm>
                     <label for="">From :</label>
-                    <select ngModel name="from" class="form-control">
+                    <select ngModel name="from" (change)="showDels(copy)" class="form-control">
                         <!-- <option selected disabled value="">Select</option> -->
                         <option *ngFor="let user of users" [ngValue]="user">{{user.username}}</option>
                     </select>
+                    <ul class="list-group">
+                        <li class="list-group-item" *ngFor="let dels of fromDels;let i = index">
+                            {{dels.name}}
+                            <span class="glyphicon glyphicon-remove" (click)="addRemoveDel(i)" style="float:right"></span>
+                        </li>
+                    </ul>
+
                     <label for="">To :</label>
                     <select ngModel name="to" class="form-control">
                         <!-- <option selected disabled value="">Select</option> -->
                         <option *ngFor="let user of users" [ngValue]="user">{{user.username}}</option>
                     </select>
-                    <button type="button" (click)="copyDels(copy)" class="btn btn-warning">Klistra in</button>
+                    <button type="button" (click)="copyDels(copy)" class="btn btn-warning">Flytta</button>
                 </form>
 
 
@@ -1014,6 +1023,81 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="getAccess" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Grant Access</h4>
+            </div>
+            <div class="modal-body">
+                <form #changeForm=ngForm>
+                    <label for="">Enter Password</label>
+                    <input type="password" class="form-control" ngModel name="password">
+                    <br>
+                    <input type="submit" (click)="getAccess(changeForm)" class="btn btn-primary">
+                </form>
+                <p style="text-align:center;color:green">{{grantMessage}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="potraitPdf" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Warning</h4>
+            </div>
+            <div class="modal-body">
+                    <h4>Du har inte satt ut alla timmarna för grupppaktiviter {{timeLeft}} kvar</h4>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <button class="btn btn-warning" (click)="print()" data-dismiss="modal"> Continue</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="landscapePdf" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Warning</h4>
+            </div>
+            <div class="modal-body">
+                <h4>Du har inte satt ut alla timmarna för grupppaktiviter {{timeLeft}} kvar</h4>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <button class="btn btn-warning" (click)="printLandscape()" data-dismiss="modal"> Continue</button>
             </div>
         </div>
         <!-- /.modal-content -->
