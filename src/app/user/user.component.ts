@@ -62,8 +62,8 @@ export class UserComponent implements OnInit {
   selectedEvent = {};
   delNames = [{ name: '', spa: '', start: new Date(), end: new Date() }];
   weekTemplateName;
-  copyWeek = [{week : 0,del : ''}];
-  timeLeft=0;
+  copyWeek = [{ week: 0, del: '' }];
+  timeLeft = 0;
 
   // Calendar Object
   calendarOptions: Object = {
@@ -71,8 +71,8 @@ export class UserComponent implements OnInit {
     defaultDate: '2016-09-12',
     editable: true,
     allDaySlot: false,
-    eventTextColor : 'black',
-    eventOverlap :  false,
+    eventTextColor: 'black',
+    eventOverlap: false,
     weekends: false,
     minTime: '08:00:00',
     maxTime: '17:00:00',
@@ -122,7 +122,7 @@ export class UserComponent implements OnInit {
 
   constructor(private ac: ActivatedRoute, private us: UserService, private router: Router) {
     this.selectedWeek.delName = localStorage.getItem('weekTemplate');
-    localStorage.setItem('grant_access','false');
+    localStorage.setItem('grant_access', 'false');
     this.local = localStorage;
   }
 
@@ -248,14 +248,14 @@ export class UserComponent implements OnInit {
     this.us.getSelectedWeek(this.selectedWeek.week, this.selectedWeek.user).subscribe((res: any) => {
       res = JSON.parse(res._body);
       if (res.exist) {
-        if(res.data[0].delName==''){
-          res.data[0].delName=res.data[0].name;
+        if (res.data[0].delName == '') {
+          res.data[0].delName = res.data[0].name;
         }
         this.selectedWeek = res.data[0];
         this.events = res.data[0].events;
-        
-        for(let event of this.events){
-          event.title = `${event.data.title}${event.data.role ? '\n'+ event.data.role : ''}\nAnteckningar :${event.data.notes}`
+
+        for (let event of this.events) {
+          event.title = `${event.data.title}${event.data.role ? '\n' + event.data.role : ''}\nAnteckningar :${event.data.notes}`
         }
 
         _('#calendar').fullCalendar('removeEvents');
@@ -266,7 +266,7 @@ export class UserComponent implements OnInit {
         } else {
           this.showRemain = false;
         }
-        if(this.selectedWeek.address==''){
+        if (this.selectedWeek.address == '') {
           this.selectedWeek.address = this.local.address;
         }
 
@@ -282,7 +282,7 @@ export class UserComponent implements OnInit {
   }
 
   pasteEvents() {
-    var obj={};
+    var obj = {};
     obj['selectedWeek'] = JSON.parse(JSON.stringify(this.selectedWeek));
     obj['copyWeek'] = this.copyWeek;
     this.us.copyCalendar(obj, this.copyWeek[0].del).subscribe((res: any) => {
@@ -301,7 +301,7 @@ export class UserComponent implements OnInit {
       console.log(res);
       res = JSON.parse(res._body);
       console.log(this.selectedUser.delName.concat(res.dels));
-      if('dels' in res){
+      if ('dels' in res) {
         this.selectedUser.delName = this.selectedUser.delName.concat(res.dels);
       }
 
@@ -313,7 +313,7 @@ export class UserComponent implements OnInit {
 
   // Update Events resized
   updateResize() {
-    this.us.updateResize(this.local.week,this.selectedWeek['_id'], this.updatedEvents).subscribe((res: any) => {
+    this.us.updateResize(this.local.week, this.selectedWeek['_id'], this.updatedEvents).subscribe((res: any) => {
       //console.log(res);
       res = JSON.parse(res._body);
       this.showResize = true;
@@ -336,9 +336,9 @@ export class UserComponent implements OnInit {
 
       }
 
-      setTimeout(()=>{
+      setTimeout(() => {
         this.resizeMessage = '';
-      },2000)
+      }, 2000)
     })
   }
 
@@ -451,10 +451,10 @@ export class UserComponent implements OnInit {
     var spa;
     console.log(this.selectedWeek);
     for (let s of this.spas) {
-      
+
       if (s.code == this.selectedWeek.spaBlock) {
         spa = s;
-        
+
         this.showRemain = true;
         for (let temp = 0; temp < spa.templates.length; temp++) {
           this.remainingTime[temp] = {
@@ -467,18 +467,18 @@ export class UserComponent implements OnInit {
         break;
       }
     }
-    
+
 
     var a: number = 0;
-    if(spa){
+    if (spa) {
       for (let s of spa.templates) {
         if (s.name.id == '5a575bddfd1a1d0004cb1f1b' || s.name.id == "5a576897fd1a1d0004cb1f1d") {
           a += s.hrs;
         }
-  
+
       }
     }
-    
+
 
     this.selectedWeek.timmar = a;
     for (let event of this.events) {
@@ -498,9 +498,9 @@ export class UserComponent implements OnInit {
       this.us.setSelectedWeek(this.selectedWeek).subscribe((res: any) => {
         res = JSON.parse(res._body);
         this.weekMessage = res.message;
-        setTimeout(()=>{
+        setTimeout(() => {
           this.weekMessage = '';
-        },2000)
+        }, 2000)
       }, (err: any) => {
 
       })
@@ -811,6 +811,8 @@ export class UserComponent implements OnInit {
 
     // Validations
 
+
+
     if (ev.value.endTime < ev.value.startTime) {
       this.show = true;
       this.alreadyMessage = "End Time Should Be Greater";
@@ -819,10 +821,23 @@ export class UserComponent implements OnInit {
     } else {
       this.show = false;
     }
-    var dt1 = new Date(`October 13, 2014 ${ev.value.endTime}`);
-    var dt2 = new Date(`October 13, 2014 ${ev.value.startTime}`);
+    var dt1 = new Date(`${ev.value.date} ${ev.value.endTime}`);
+    var dt2 = new Date(`${ev.value.date} ${ev.value.startTime}`);
     var duration = (dt1.getHours() - dt2.getHours()) + (((dt1.getMinutes() - dt2.getMinutes())) / 60);
+    console.log(dt1, dt2);
 
+    for (let event of this.events) {
+      let start = new Date(event.start).getTime();
+      let end = new Date(event.end).getTime();
+      if ((dt2.getTime() >= start && dt2.getTime() < end) || (dt1.getTime() > start && dt1.getTime() <= end)) {
+        this.show = true;
+        this.alreadyMessage = "Du kan inte skapa event på varandra";
+        this.already = false;
+        return;
+      } else {
+        this.show = false;
+      }
+    }
     for (let r of this.remainingTime) {
       if (r.title == ev.value.template.title) {
         if (r.duration < duration) {
@@ -911,7 +926,7 @@ export class UserComponent implements OnInit {
     //console.log("delete function")
     //console.log(this.selectedEvent);
     //console.log(this.events);
-    this.us.deleteEvent(this.selectedEvent['id'],this.selectedWeek['_id'], week).subscribe((res: any) => {
+    this.us.deleteEvent(this.selectedEvent['id'], this.selectedWeek['_id'], week).subscribe((res: any) => {
       //console.log(res);
       var index;
       for (let event = 0; event < this.events.length; event++) {
@@ -944,7 +959,7 @@ export class UserComponent implements OnInit {
     console.log(this.selectedEvent);
     var no_of_days = this.dateDiffInDays(new Date('2018-01-01'), new Date(this.selectedEvent['start']._d)) + 1;
     var week = Math.ceil(no_of_days / 7);
-    this.us.updateEvent(this.selectedEvent['id'],this.selectedWeek['_id'], week, obj).subscribe((res: any) => {
+    this.us.updateEvent(this.selectedEvent['id'], this.selectedWeek['_id'], week, obj).subscribe((res: any) => {
       res = JSON.parse(res._body);
       this.show = true;
       this.editEvent = false;
@@ -957,8 +972,8 @@ export class UserComponent implements OnInit {
       }
       //console.log(this.selectedEvent);
       //console.log(this.events);
-      
-      this.events[index].title = obj['title'] + `${'role' in obj? '\n'+obj.role : ''}'\n'Anteckningar : ${obj.notes}`;
+
+      this.events[index].title = obj['title'] + `${'role' in obj ? '\n' + obj.role : ''}'\n'Anteckningar : ${obj.notes}`;
       _('#calendar').fullCalendar('removeEvents');
       _('#calendar').fullCalendar('addEventSource', this.events);
       this.alreadyMessage = res.message;
@@ -974,63 +989,71 @@ export class UserComponent implements OnInit {
     this.delNames.splice(index, 1);
   }
 
-  addWeek(){
-    this.copyWeek.push({week : 0, del : ''});
+  addWeek() {
+    this.copyWeek.push({ week: 0, del: '' });
   }
 
-  removeWeek(index){
-    this.copyWeek.splice(index,1);
+  removeWeek(index) {
+    this.copyWeek.splice(index, 1);
   }
 
-  getAccess(form){
+  getAccess(form) {
     form.value.username = 'admin';
-    this.us.getAccess(form.value).subscribe((res:any)=>{
+    this.us.getAccess(form.value).subscribe((res: any) => {
       res = JSON.parse(res._body);
-      if(!res.error){
+      if (!res.error) {
         this.grantMessage = 'Access Granted';
-        this.local.setItem('grant_access','true');
-      }else{
+        this.local.setItem('grant_access', 'true');
+      } else {
         this.grantMessage = 'Only Admin Can Use These Features';
       }
-    },(er:any)=>{
+    }, (er: any) => {
 
     })
   }
 
-  copyDels(form){
+  copyDels(form) {
     console.log(form.value)
-    this.us.moveDelName(form.value.to.username,form.value.from.username, this.fromDels).subscribe((res:any)=>{
+    this.us.moveDelName(form.value.to.username, form.value.from.username, this.fromDels).subscribe((res: any) => {
       this.pasteMessage = true;
       form.value.to.delName = form.value.to.delName.concat(this.fromDels);
-      for(let del of this.fromDels){
-        form.value.from.delName.splice(form.value.from.delName.indexOf(del),1)  
+      for (let del of this.fromDels) {
+        form.value.from.delName.splice(form.value.from.delName.indexOf(del), 1)
       }
       form.value.from.delName
-    },(err:any)=>{
+    }, (err: any) => {
 
     })
   }
 
-  showDels(from){
-    this.fromDels = JSON.parse(JSON.stringify( from.value.from.delName));
+  showDels(from) {
+    this.fromDels = JSON.parse(JSON.stringify(from.value.from.delName));
     console.log(this.fromDels);
   }
 
-  addRemoveDel(i){
-    this.fromDels.splice(i,1); 
+  addRemoveDel(i) {
+    this.fromDels.splice(i, 1);
   }
 
-  printWarning(id){
-    
-    for(let r of this.remainingTime){
+  printWarning(id) {
+
+    this.timeLeft = 0;
+    for (let r of this.remainingTime) {
       this.timeLeft += parseFloat(r.duration);
     }
-    if(this.timeLeft > 0){
-      $(id).modal('show');
-    }else{
-      if(id == '#potraitPdf'){
+    if (this.timeLeft > 0) {
+      var a = window.confirm(`Du har inte satt ut alla timmarna för grupppaktiviter ${this.timeLeft} kvar`);
+      if (a) {
+        if (id == '#potraitPdf') {
+          this.print();
+        } else {
+          this.printLandscape();
+        }
+      }
+    } else {
+      if (id == '#potraitPdf') {
         this.print();
-      }else{
+      } else {
         this.printLandscape();
       }
     }
