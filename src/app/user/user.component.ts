@@ -228,6 +228,13 @@ export class UserComponent implements OnInit {
           return 1;
         }
       })
+      this.dels.sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        } else {
+          return 1;
+        }
+      })
       localStorage.setItem('weekTemplate', this.dels[0].name)
       this.selectedWeek.spaBlock = this.dels[0].spa;
       this.getSelectedWeek(this.selectedWeek.week);
@@ -248,11 +255,21 @@ export class UserComponent implements OnInit {
     this.us.getSelectedWeek(this.selectedWeek.week, this.selectedWeek.user).subscribe((res: any) => {
       res = JSON.parse(res._body);
       if (res.exist) {
+
         if (res.data[0].delName == '') {
           res.data[0].delName = res.data[0].name;
         }
+        
         this.selectedWeek = res.data[0];
         this.events = res.data[0].events;
+
+        if(this.selectedWeek.spaBlock == ''){
+          for(let del of this.dels){
+            if(del.name == this.selectedWeek.delName){
+              this.selectedWeek.spaBlock = del.spa;
+            }
+          }
+        }
 
         for (let event of this.events) {
           event.title = `${event.data.title}${event.data.role ? '\n' + event.data.role : ''}\nAnteckningar :${event.data.notes}`
@@ -532,14 +549,14 @@ export class UserComponent implements OnInit {
   // To take PDF of web Page
   print() {
     html2canvas(document.body, {
-      onrendered: function (canvas) {
-        var img = canvas.toDataURL("image/png");
+      onrendered:  (canvas) => {
+        var img = canvas.toDataURL('image/jpeg', 1.0);
         var doc = new jsPDF({
           unit: 'px',
           format: 'a4'
         });
         doc.addImage(img, 'JPEG', 20, 20, 400, 380);
-        doc.save(`${localStorage.getItem('weekTemplate')}  schema.pdf`);
+        doc.save(`${localStorage.getItem('weekTemplate')} ${this.selectedWeek.week} schema.pdf`);
         document.body.style.width = '100%';
         document.body.style.height = '100%';
       }
@@ -549,11 +566,12 @@ export class UserComponent implements OnInit {
 
   printLandscape() {
     html2canvas(document.body, {
-      onrendered: function (canvas) {
+      onrendered:  (canvas) => {
         var img = canvas.toDataURL("image/png");
         var doc = new jsPDF('l', 'mm', [297, 210]);
         doc.addImage(img, 'JPEG', 20, 20, 220, 180);
-        doc.save(`${localStorage.getItem('weekTemplate')}  schema.pdf`);
+        console.log(this.selectedWeek);
+        doc.save(`${localStorage.getItem('weekTemplate')} ${this.selectedWeek.week} schema.pdf`);
         document.body.style.width = '100%';
         document.body.style.height = '100%';
       }
@@ -1036,13 +1054,17 @@ export class UserComponent implements OnInit {
   }
 
   printWarning(id) {
-
+    console.log(this.remainingTime);
     this.timeLeft = 0;
+    var message = 'Du har inte satt ut alla timmarna för ';
     for (let r of this.remainingTime) {
       this.timeLeft += parseFloat(r.duration);
     }
     if (this.timeLeft > 0) {
-      var a = window.confirm(`Du har inte satt ut alla timmarna för grupppaktiviter ${this.timeLeft} kvar`);
+      for (let r of this.remainingTime) {
+        message += `${r.duration} ${r.title} `
+      } 
+      var a = window.confirm(message);
       if (a) {
         if (id == '#potraitPdf') {
           this.print();
