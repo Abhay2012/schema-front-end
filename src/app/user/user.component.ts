@@ -113,6 +113,11 @@ export class UserComponent implements OnInit {
       center: 'title',
       right: 'month,agendaWeek,agendaDay, listMonth'
     },
+    views: {
+      agendaWeek: {
+      columnFormat:'dddd D/M'
+      }
+  },
     defaultView: 'agendaWeek',
     events: [],
     timeFormat: 'H(:mm)',
@@ -556,7 +561,7 @@ export class UserComponent implements OnInit {
           format: 'a4'
         });
         doc.addImage(img, 'JPEG', 20, 20, 400, 380);
-        doc.save(`${localStorage.getItem('weekTemplate')} ${this.selectedWeek.week} schema.pdf`);
+        doc.save(`${localStorage.getItem('weekTemplate')} v${this.selectedWeek.week} schema.pdf`);
         document.body.style.width = '100%';
         document.body.style.height = '100%';
       }
@@ -567,11 +572,11 @@ export class UserComponent implements OnInit {
   printLandscape() {
     html2canvas(document.body, {
       onrendered:  (canvas) => {
-        var img = canvas.toDataURL("image/png");
+        var img = canvas.toDataURL('image/jpeg', 1.0);
         var doc = new jsPDF('l', 'mm', [297, 210]);
         doc.addImage(img, 'JPEG', 20, 20, 220, 180);
         console.log(this.selectedWeek);
-        doc.save(`${localStorage.getItem('weekTemplate')} ${this.selectedWeek.week} schema.pdf`);
+        doc.save(`${localStorage.getItem('weekTemplate')} v${this.selectedWeek.week} schema.pdf`);
         document.body.style.width = '100%';
         document.body.style.height = '100%';
       }

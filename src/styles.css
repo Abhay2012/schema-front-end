@@ -38,3 +38,7 @@ body{
 div.fc-scroller{
   height: 430px !important;
 }
+
+.fc-title, .fc-time{
+  font-weight : bold;
+}

@@ -428,9 +428,9 @@
             <table class="table">
                 <tbody>
                     <tr>
-                        <td>Adress : </td>
+                        <td><b> Adress : </b></td>
                         <td>
-                            {{local.address}}
+                            <b> {{local.address}} </b>
                             <!-- <select [(ngModel)]="selectedWeek.address" class="form-control">
                                 <option selected disabled value="">
                                     Select
@@ -442,15 +442,15 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Handledare : </td>
+                        <td> <b> Handledare : </b> </td>
                         <td>
-                            {{username}}
+                            <b> {{username}} </b>
                         </td>
                     </tr>
                     <tr>
-                        <td>Deltagarens namn : </td>
+                        <td> <b> Deltagarens namn :</b> </td>
                         <td>
-                            {{selectedWeek.delName}}
+                            <b> {{selectedWeek.delName}} </b>
                             <!-- <select [(ngModel)]="selectedWeek.delName"  class="form-control">
                             <option selected disabled value="">Select</option>
                             <option *ngFor="let del of dels" [value]="del.name">{{del.name}}</option>
@@ -458,7 +458,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Vecka : </td>
+                        <td> <b> Vecka : </b> </td>
                         <td>
                             <select class="form-control" (change)="getSelectedWeek(selectedWeek.week,true)" [(ngModel)]="selectedWeek.week">
                                 <option selected disabled value="0">Select</option>
@@ -469,9 +469,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>SpårOchBlock : </td>
+                        <td> <b> SpårOchBlock : </b> </td>
                         <td>
-                            <span *ngIf="local.grant_access == 'false'">{{selectedWeek.spaBlock}}</span>
+                            <span *ngIf="local.grant_access == 'false'"> <b> {{selectedWeek.spaBlock}} </b> </span>
                             <select *ngIf="local.grant_access != 'false'" class="form-control" [(ngModel)]="selectedWeek.spaBlock" (change)="remainingTimeCal()">
                                 <option selected disabled value="">Select</option>
                                 <option *ngFor="let spa of spas" [value]="spa.code">
@@ -481,15 +481,15 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Timmar denna veckan : </td>
+                        <td> <b> Timmar denna veckan : </b> </td>
                         <td>
-                            {{ selectedWeek.timmar }}
+                            <b> {{ selectedWeek.timmar }} </b>
                         </td>
                     </tr>
                     <tr>
-                        <td>Öppettider : </td>
+                        <td> <b> Öppettider : </b> </td>
                         <td>
-                            {{ local.oppe }}
+                            <b> {{ local.oppe }} </b>
                         </td>
                     </tr>
                 </tbody>
@@ -497,10 +497,10 @@
 
         </div>
         <div class="col-sm-4">
-            <h4 style="text-align:center">Verktyg</h4>
+            <h4 style="text-align:center"> <b> Verktyg </b></h4>
             <br>
             <div style="height:215px;overflow-y:auto;">
-                <span *ngFor="let ver of vers">{{ver.notes}}
+                <span *ngFor="let ver of vers"> <b> {{ver.notes}} </b>
                     <br>
                 </span>
             </div>
