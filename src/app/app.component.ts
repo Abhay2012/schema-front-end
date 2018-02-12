@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -9,16 +8,6 @@ import { ActivatedRoute } from '@angular/router';
 export class AppComponent {
   logout: boolean;
 
-  constructor( private ac : ActivatedRoute) {
-    if(document.URL.indexOf('login')){
-      this.logout = false;
-    }else{
-      
-    }
+  constructor() {
   }
-
-  // logout() {
-
-  // }
-
 }

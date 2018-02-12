@@ -1,11 +1,43 @@
+<div>
+    <nav id="nav" style="background-color:black;height:50px;">
+      <!-- <div class="col-sm-1">
+
+      </div> -->
+      <h3 class="col-sm-11" style="color:#ecebee;margin-top:0;margin-bottom:0;padding:12px;"> Schema  </h3>
+      <span class="glyphicon glyphicon-chevron-down" (click)="showSideMenu('block')" style="float:right;font-size:12px;top:10px;right:10px;color:white"></span>
+    </nav>
+    <ul id="sideMenu" (click)="showSideMenu('none')" style="padding:0px;position:fixed;right:0;background-color:white;display:none;cursor:pointer;z-index:1000">
+        <li class="sideMenu-item" (click)="createUser('#changePassword')">
+            Change Password
+        </li>
+        <li *ngIf="user_id=='admin'" class="sideMenu-item"  (click)="createUser('#changeCopyPassword')">
+            Change Copy Password
+        </li>
+        <li *ngIf="user_id!='admin'" class="sideMenu-item" (click)="createUser('#getAccess')" >
+            Get Access
+        </li>
+        <li *ngIf="user_id!='admin'" class="sideMenu-item" (click)="createUser('#copyAccess')">
+            Copy Access
+        </li>
+        <li (click)="logout()" class="sideMenu-item">
+            Logout
+        </li>
+
+    </ul>
+  </div>
 <img style="width: 60px;z-index: 1000;margin-top:10px;margin-left:10px" src="assets/icon.ico" alt="">
-<button *ngIf="user_id!='admin'" class="btn btn-primary" (click)="createUser('#getAccess')">Get Access</button>
-<span (click)="createUser('#changePassword')" style="float:right;padding-right:40px;cursor:pointer">
+<!-- <button *ngIf="user_id!='admin'" class="btn btn-primary" (click)="createUser('#getAccess')">Get Access</button>
+<button *ngIf="user_id!='admin'" class="btn btn-primary" (click)="createUser('#copyAccess')">Copy Access</button>
+<span (click)="createUser('#changeCopyPassword')" style="float:right;padding-right:40px;cursor:pointer">
     <b> Change Password </b>
 </span>
+
 <span (click)="logout()" style="float:right;padding-right:40px;cursor:pointer">
     <b> Logout </b>
 </span>
+<span *ngIf="user_id=='admin'" (click)="createUser('#changePassword')" style="float:right;padding-right:40px;cursor:pointer">
+    <b> Change Password </b>
+</span> -->
 
 <div *ngIf="user_id!='admin'" class="col-sm-12" style="margin-top:10px;margin-bottom:10px" id="hide">
     <div class="col-sm-4">
@@ -28,21 +60,10 @@
 </div>
 
 <div *ngIf="user_id == 'admin'">
-    <div style="background-color:black;border-radius:5px;color:white;margin:10px;padding:10px">
-        Admin Panel
-        <span style="float:right;cursor:pointer">
-            <span (click)="createUser('#createUser')" *ngIf="tab==1"> Create User </span>
-            <span (click)="createUser('#createAddress')" *ngIf="tab==2"> Add Adress </span>
-            <span (click)="createUser('#createVer')" *ngIf="tab==3"> Add Verktyg </span>
-            <span (click)="createUser('#createSpa')" *ngIf="tab==4"> Add SpårOchBlock </span>
-            <span (click)="createUser('#createTemp')" *ngIf="tab==5"> Add Template </span>
-            <!-- <span (click)="createUser('#createTemp')" *ngIf="tab==6">Deltagares Namn</span> -->
-            <span style="font-size:12px;padding:3px" class="glyphicon glyphicon-plus"></span>
-        </span>
-    </div>
+    
     <h3 style="text-align:center">{{message}}</h3>
     <div [ngSwitch]="tab">
-        <ul style="margin-left:20px;margin-right:20px;" class="nav nav-tabs">
+        <ul style="margin-left:20px;margin-right:20px;background-color:#4aa23a;" class="nav nav-tabs">
             <li role="presentation" (click)="tab=1;edit=false;" [class.active]="tab == 1">
                 <a>User List</a>
             </li>
@@ -60,6 +81,13 @@
             </li>
             <li role="presentation" (click)="tab=6;edit=false;" [class.active]="tab == 6">
                 <a>Deltagares Namn</a>
+            </li>
+            <li style="float:right" role="presentation">
+                <a (click)="createUser('#createUser')" *ngIf="tab==1"> Create User </a>
+                <a (click)="createUser('#createAddress')" *ngIf="tab==2"> Add Adress </a>
+                <a (click)="createUser('#createVer')" *ngIf="tab==3"> Add Verktyg </a>
+                <a (click)="createUser('#createSpa')" *ngIf="tab==4"> Add SpårOchBlock </a>
+                <a (click)="createUser('#createTemp')" *ngIf="tab==5"> Add Template </a>
             </li>
         </ul>
         <div style="padding:25px" *ngIf="tab == 1">
@@ -428,7 +456,9 @@
             <table class="table">
                 <tbody>
                     <tr>
-                        <td><b> Adress : </b></td>
+                        <td>
+                            <b> Adress : </b>
+                        </td>
                         <td>
                             <b> {{local.address}} </b>
                             <!-- <select [(ngModel)]="selectedWeek.address" class="form-control">
@@ -442,13 +472,17 @@
                         </td>
                     </tr>
                     <tr>
-                        <td> <b> Handledare : </b> </td>
+                        <td>
+                            <b> Handledare : </b>
+                        </td>
                         <td>
                             <b> {{username}} </b>
                         </td>
                     </tr>
                     <tr>
-                        <td> <b> Deltagarens namn :</b> </td>
+                        <td>
+                            <b> Deltagarens namn :</b>
+                        </td>
                         <td>
                             <b> {{selectedWeek.delName}} </b>
                             <!-- <select [(ngModel)]="selectedWeek.delName"  class="form-control">
@@ -458,7 +492,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td> <b> Vecka : </b> </td>
+                        <td>
+                            <b> Vecka : </b>
+                        </td>
                         <td>
                             <select class="form-control" (change)="getSelectedWeek(selectedWeek.week,true)" [(ngModel)]="selectedWeek.week">
                                 <option selected disabled value="0">Select</option>
@@ -469,9 +505,13 @@
                         </td>
                     </tr>
                     <tr>
-                        <td> <b> SpårOchBlock : </b> </td>
                         <td>
-                            <span *ngIf="local.grant_access == 'false'"> <b> {{selectedWeek.spaBlock}} </b> </span>
+                            <b> SpårOchBlock : </b>
+                        </td>
+                        <td>
+                            <span *ngIf="local.grant_access == 'false'">
+                                <b> {{selectedWeek.spaBlock}} </b>
+                            </span>
                             <select *ngIf="local.grant_access != 'false'" class="form-control" [(ngModel)]="selectedWeek.spaBlock" (change)="remainingTimeCal()">
                                 <option selected disabled value="">Select</option>
                                 <option *ngFor="let spa of spas" [value]="spa.code">
@@ -481,13 +521,17 @@
                         </td>
                     </tr>
                     <tr>
-                        <td> <b> Timmar denna veckan : </b> </td>
+                        <td>
+                            <b> Timmar denna veckan : </b>
+                        </td>
                         <td>
                             <b> {{ selectedWeek.timmar }} </b>
                         </td>
                     </tr>
                     <tr>
-                        <td> <b> Öppettider : </b> </td>
+                        <td>
+                            <b> Öppettider : </b>
+                        </td>
                         <td>
                             <b> {{ local.oppe }} </b>
                         </td>
@@ -497,10 +541,13 @@
 
         </div>
         <div class="col-sm-4">
-            <h4 style="text-align:center"> <b> Verktyg </b></h4>
+            <h4 style="text-align:center">
+                <b> Verktyg </b>
+            </h4>
             <br>
             <div style="height:215px;overflow-y:auto;">
-                <span *ngFor="let ver of vers"> <b> {{ver.notes}} </b>
+                <span *ngFor="let ver of vers">
+                    <b> {{ver.notes}} </b>
                     <br>
                 </span>
             </div>
@@ -532,7 +579,7 @@
             </span>
         </div>
         <button class="btn btn-primary" (click)="updateResize()">Spara</button>
-        <button class="btn btn-primary" *ngIf="local.grant_access != 'false'" (click)="createUser('#copyEvents')">Kopiera</button>
+        <button class="btn btn-primary" *ngIf="local.copy_access != 'false'" (click)="createUser('#copyEvents')">Kopiera</button>
         <br>
         <br>
         <angular2-fullcalendar id="calendar" [options]="calendarOptions"></angular2-fullcalendar>
@@ -965,14 +1012,49 @@
                 <h4 class="modal-title">Change Password</h4>
             </div>
             <div class="modal-body">
-                <form #changeForm=ngForm>
+                <form #changePasword=ngForm>
+                    <label for="">Current Password</label>
+                    <input type="password" class="form-control" ngModel name="oldPassword">
+                    <br>
+                    <label for="">New Password</label>
+                    <input type="password" (click)="passwordMessageNeg=false" class="form-control" ngModel name="newPassword">
+                    <p>* Password Can Only contain A-Z, a-z, 0-9</p>
+                    <br>
+                    <input type="submit" (click)="changePassword(changePasword)" class="btn btn-primary">
+                </form>
+                <p *ngIf="passwordMessage" style="text-align:center;color:green">Password Updated</p>
+                <p *ngIf="passwordMessageNeg" style="text-align:center;color:red">Password Can Only Contains A-Z, a-z, 0-9</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="changeCopyPassword" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Change Password</h4>
+            </div>
+            <div class="modal-body">
+                <form #changeCopyPass=ngForm>
                     <label for="">Current Password</label>
                     <input type="password" class="form-control" ngModel name="oldPassword">
                     <br>
                     <label for="">New Password</label>
                     <input type="password" class="form-control" ngModel name="newPassword">
+                    <p>* Password Can Only contain A-Z, a-z, 0-9</p>
                     <br>
-                    <input type="submit" (click)="changePassword(changeForm)" class="btn btn-primary">
+                    <input type="submit" (click)="changeCopyPassword(changeCopyPass)" class="btn btn-primary">
                 </form>
                 <p *ngIf="passwordMessage" style="text-align:center;color:green">Password Updated</p>
             </div>
@@ -1041,11 +1123,11 @@
                 <h4 class="modal-title">Grant Access</h4>
             </div>
             <div class="modal-body">
-                <form #changeForm=ngForm>
+                <form #changedForm=ngForm>
                     <label for="">Enter Password</label>
                     <input type="password" class="form-control" ngModel name="password">
                     <br>
-                    <input type="submit" (click)="getAccess(changeForm)" class="btn btn-primary">
+                    <input type="submit" (click)="getAccess(changedForm)" class="btn btn-primary">
                 </form>
                 <p style="text-align:center;color:green">{{grantMessage}}</p>
             </div>
@@ -1060,3 +1142,31 @@
 </div>
 <!-- /.modal -->
 
+<div class="modal fade" id="copyAccess" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Grant Access</h4>
+            </div>
+            <div class="modal-body">
+                <form #changeForm=ngForm>
+                    <label for="">Enter Password</label>
+                    <input type="password" class="form-control" ngModel name="password">
+                    <br>
+                    <input type="submit" (click)="copyAccess(changeForm)" class="btn btn-primary">
+                </form>
+                <p style="text-align:center;color:green">{{grantMessage}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->

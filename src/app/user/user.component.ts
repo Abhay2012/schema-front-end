@@ -22,6 +22,7 @@ export class UserComponent implements OnInit {
   editEvent: boolean = false;
   updatedNotes;
   weeks: any;
+  passwordMessageNeg = false;
   createTemp: boolean = false;;
   updatedEvents = [];
   stTime = "08:00:00";
@@ -115,9 +116,9 @@ export class UserComponent implements OnInit {
     },
     views: {
       agendaWeek: {
-      columnFormat:'dddd D/M'
+        columnFormat: 'dddd D/M'
       }
-  },
+    },
     defaultView: 'agendaWeek',
     events: [],
     timeFormat: 'H(:mm)',
@@ -128,6 +129,7 @@ export class UserComponent implements OnInit {
   constructor(private ac: ActivatedRoute, private us: UserService, private router: Router) {
     this.selectedWeek.delName = localStorage.getItem('weekTemplate');
     localStorage.setItem('grant_access', 'false');
+    localStorage.setItem('copy_access', 'false');
     this.local = localStorage;
   }
 
@@ -264,13 +266,13 @@ export class UserComponent implements OnInit {
         if (res.data[0].delName == '') {
           res.data[0].delName = res.data[0].name;
         }
-        
+
         this.selectedWeek = res.data[0];
         this.events = res.data[0].events;
 
-        if(this.selectedWeek.spaBlock == ''){
-          for(let del of this.dels){
-            if(del.name == this.selectedWeek.delName){
+        if (this.selectedWeek.spaBlock == '') {
+          for (let del of this.dels) {
+            if (del.name == this.selectedWeek.delName) {
               this.selectedWeek.spaBlock = del.spa;
             }
           }
@@ -554,7 +556,7 @@ export class UserComponent implements OnInit {
   // To take PDF of web Page
   print() {
     html2canvas(document.body, {
-      onrendered:  (canvas) => {
+      onrendered: (canvas) => {
         var img = canvas.toDataURL('image/jpeg', 1.0);
         var doc = new jsPDF({
           unit: 'px',
@@ -571,7 +573,7 @@ export class UserComponent implements OnInit {
 
   printLandscape() {
     html2canvas(document.body, {
-      onrendered:  (canvas) => {
+      onrendered: (canvas) => {
         var img = canvas.toDataURL('image/jpeg', 1.0);
         var doc = new jsPDF('l', 'mm', [297, 210]);
         doc.addImage(img, 'JPEG', 20, 20, 220, 180);
@@ -642,14 +644,13 @@ export class UserComponent implements OnInit {
       this.message = res.message;
       //console.log(res);
       this.users = res;
-      var index
       for (let user = 0; user < this.users.length; user++) {
-        if (this.users[user].username == 'admin') {
-          index = user;
+        if (this.users[user].username == 'admin' || this.users[user].username == 'copyAccess') {
+          this.users.splice(user, 1);
         }
       }
 
-      this.users.splice(index, 1);
+
       // //console.log(this.users);
     }, (err: any) => {
 
@@ -675,17 +676,36 @@ export class UserComponent implements OnInit {
   createUser(id) {
     this.editEvent = false;
     this.alreadyMessage = '';
+    this.grantMessage = '';
+    this.passwordMessage = false;
+    this.passwordMessageNeg = false;
     //console.log("ddcsd");
     $(id).modal('show');
   }
 
   changePassword(event) {
-    //console.log(event.value);
-    this.us.changePassword(event.value).subscribe((res: any) => {
-      this.passwordMessage = true;
-    }, (err: any) => {
+    console.log(event.value);
+    if (event.value.newPassword.match(/^[0-9a-zA-Z]+$/)) {
+      this.us.changePassword(event.value).subscribe((res: any) => {
+        this.passwordMessage = true;
+      }, (err: any) => {
 
-    })
+      })
+    }else{
+      this.passwordMessageNeg = true;
+    }
+
+  }
+
+  changeCopyPassword(event) {
+    //console.log(event.value);
+    if (event.value.newPassword.match(/^[0-9a-zA-Z]+$/)) {
+      this.us.changeCopyPassword(event.value).subscribe((res: any) => {
+        this.passwordMessage = true;
+      }, (err: any) => {
+
+      })
+    }
   }
 
   // To add data from Admin Account
@@ -1022,11 +1042,30 @@ export class UserComponent implements OnInit {
 
   getAccess(form) {
     form.value.username = 'admin';
+    console.log(form);
     this.us.getAccess(form.value).subscribe((res: any) => {
       res = JSON.parse(res._body);
       if (!res.error) {
         this.grantMessage = 'Access Granted';
         this.local.setItem('grant_access', 'true');
+      } else {
+        this.grantMessage = 'Only Admin Can Use These Features';
+      }
+    }, (er: any) => {
+
+    })
+  }
+
+  func(form){
+    console.log(form);
+  }
+  copyAccess(form) {
+    form.value.username = 'copyAccess';
+    this.us.getAccess(form.value).subscribe((res: any) => {
+      res = JSON.parse(res._body);
+      if (!res.error) {
+        this.grantMessage = 'Access Granted';
+        this.local.setItem('copy_access', 'true');
       } else {
         this.grantMessage = 'Only Admin Can Use These Features';
       }
@@ -1068,7 +1107,7 @@ export class UserComponent implements OnInit {
     if (this.timeLeft > 0) {
       for (let r of this.remainingTime) {
         message += `${r.duration} ${r.title} `
-      } 
+      }
       var a = window.confirm(message);
       if (a) {
         if (id == '#potraitPdf') {
@@ -1088,4 +1127,8 @@ export class UserComponent implements OnInit {
 
   }
 
+  showSideMenu(status) {
+    console.log(status);
+    document.getElementById('sideMenu').style.display = status;
+  }
 }

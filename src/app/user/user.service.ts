@@ -123,6 +123,10 @@ export class UserService{
         return this.http.post(`${this.urls.url}/changePassword/${localStorage.getItem('username')}`, data);
     }
 
+    changeCopyPassword(data){
+        return this.http.post(`${this.urls.url}/changePassword/${'copyAccess'}`, data);
+    }
+
     getAccess(data){
         // var options : RequestOptions = { 'Content-Type' : "application/json"}
         return this.http.post(this.urls.url + `/login`, data)

@@ -23,12 +23,19 @@ span.delete-symbol:hover{
 
 a{
     cursor: pointer;
-}
-/* a{
-    color : #337ab7;
+    color : white;
 }
 
-.active{
-    background-color: #337ab7 !important;
-    color:white !important;
-} */
+a:hover{
+    color : green;
+}
+
+.sideMenu-item{
+    list-style-type:none;
+    text-align: center;
+    /* background: green; */
+    color:green;
+    padding:12px 32px 12px 32px;
+    border : 1px solid green;
+    border-top-width: 0px;
+}
