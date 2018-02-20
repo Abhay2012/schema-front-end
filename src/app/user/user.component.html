@@ -4,9 +4,9 @@
 
       </div> -->
       <h3 class="col-sm-11" style="color:#ecebee;margin-top:0;margin-bottom:0;padding:12px;"> Schema  </h3>
-      <span class="glyphicon glyphicon-chevron-down" (click)="showSideMenu('block')" style="float:right;font-size:12px;top:10px;right:10px;color:white"></span>
+      <span class="glyphicon glyphicon-chevron-down" (click)="status=!status;showSideMenu(status)" style="float:right;font-size:12px;top:10px;right:10px;color:white"></span>
     </nav>
-    <ul id="sideMenu" (click)="showSideMenu('none')" style="padding:0px;position:fixed;right:0;background-color:white;display:none;cursor:pointer;z-index:1000">
+    <ul id="sideMenu" (click)="showSideMenu(false)" style="padding:0px;position:fixed;right:0;background-color:white;display:none;cursor:pointer;z-index:1000">
         <li class="sideMenu-item" (click)="createUser('#changePassword')">
             Change Password
         </li>
@@ -14,10 +14,10 @@
             Change Copy Password
         </li>
         <li *ngIf="user_id!='admin'" class="sideMenu-item" (click)="createUser('#getAccess')" >
-            Get Access
+            Full behörighet
         </li>
         <li *ngIf="user_id!='admin'" class="sideMenu-item" (click)="createUser('#copyAccess')">
-            Copy Access
+            Kopierings behörighet
         </li>
         <li (click)="logout()" class="sideMenu-item">
             Logout
@@ -46,7 +46,7 @@
     </div>
     <div *ngIf="!createTemp" class="col-sm-8">
         <div class="col-sm-5">
-            <select class="form-control" [(ngModel)]="selectedWeek.delName" (change)="weekTemplateChange($event)">
+            <select class="form-control" (change)="weekTemplateChange($event)" [(ngModel)]="selectedWeek.delName" >
                 <!-- <option value="" selected disabled>Select</option> -->
                 <option *ngFor="let week of dels" [value]="week.name">
                     {{week.name}}
@@ -147,6 +147,8 @@
                         </div>
                         <div class="col-sm-5">
                             <span (click)="edit = true" style="border:1px solid black;border-radius:50%; padding : 10px" class="edit-symbol glyphicon glyphicon-pencil">
+                            </span>
+                            <span (click)="createUser('#changeUserPassword',user)" style="border:1px solid black;border-radius:50%; padding : 10px" class="edit-symbol glyphicon glyphicon-pencil">
                             </span>
                             <span (click)="deleteUser(user,index,'user')" style="border:1px solid black;border-radius:50%; padding : 10px" class="delete-symbol glyphicon glyphicon-trash">
                             </span>
@@ -356,6 +358,8 @@
             <br>
 
             <ul class="list-group" *ngIf="selectedUser">
+                    <input type="file" #file>
+                    <button class="btn btn-primary" (click)="upload(file)">Upload</button>
                 <li class="list-group-item" style="overflow: hidden" *ngFor="let del of delNames;let i=index">
                     <div class="col-sm-3">
                         <label for="">Name</label>
@@ -579,7 +583,7 @@
             </span>
         </div>
         <button class="btn btn-primary" (click)="updateResize()">Spara</button>
-        <button class="btn btn-primary" *ngIf="local.copy_access != 'false'" (click)="createUser('#copyEvents')">Kopiera</button>
+        <button class="btn btn-primary" *ngIf="local.copy_access != 'false' || local.grant_access != 'false'" (click)="createUser('#copyEvents')">Kopiera</button>
         <br>
         <br>
         <angular2-fullcalendar id="calendar" [options]="calendarOptions"></angular2-fullcalendar>
@@ -1055,6 +1059,36 @@
                     <p>* Password Can Only contain A-Z, a-z, 0-9</p>
                     <br>
                     <input type="submit" (click)="changeCopyPassword(changeCopyPass)" class="btn btn-primary">
+                </form>
+                <p *ngIf="passwordMessage" style="text-align:center;color:green">Password Updated</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="changeUserPassword" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Change Password</h4>
+            </div>
+            <div class="modal-body">
+                <form #changeUserPass=ngForm>
+                    <label for="">New Password</label>
+                    <input type="password" class="form-control" ngModel name="newPassword">
+                    <p>* Password Can Only contain A-Z, a-z, 0-9</p>
+                    <br>
+                    <input type="submit" (click)="changeUserPassword(changeUserPass)" class="btn btn-primary">
                 </form>
                 <p *ngIf="passwordMessage" style="text-align:center;color:green">Password Updated</p>
             </div>

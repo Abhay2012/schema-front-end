@@ -3,7 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from './user.service';
 import { FormGroup, FormControl, FormArray } from '@angular/forms';
 import * as _ from 'jquery';
-
+import filestack from 'filestack-js';
+ 
 declare let jsPDF: any;
 declare let $: any;
 declare let html2canvas: any;
@@ -25,6 +26,7 @@ export class UserComponent implements OnInit {
   passwordMessageNeg = false;
   createTemp: boolean = false;;
   updatedEvents = [];
+  status : boolean = false;
   stTime = "08:00:00";
   endTime = "09:00:00";
   vers: any = [];
@@ -55,6 +57,7 @@ export class UserComponent implements OnInit {
   selectedWeek = { address: '', user: '', delName: '', week: 0, spaBlock: '', timmar: null, events: [] };
   tab: number = 1;
   selectedUser;
+  selectedUserPassword;
   eventDate;
   events = [];
   grantMessage = '';
@@ -65,6 +68,7 @@ export class UserComponent implements OnInit {
   weekTemplateName;
   copyWeek = [{ week: 0, del: '' }];
   timeLeft = 0;
+  client;
 
   // Calendar Object
   calendarOptions: Object = {
@@ -135,6 +139,9 @@ export class UserComponent implements OnInit {
 
   ngOnInit() {
 
+    const apikey = 'A4e4Z1DS3RjqDK7N7IRymz';
+    this.client = filestack.init(apikey);
+    console.log(filestack.version);
     // To get Username from URL
     this.ac.params.subscribe((param) => {
       this.user_id = param.id;
@@ -173,6 +180,20 @@ export class UserComponent implements OnInit {
     // To get Data Created By Admin Account
     this.getAdminPannelData();
 
+  }
+
+  upload(file){
+    console.log(file.files[0]);
+    let data = new FormData();
+    data.append('avatar',file.files[0])
+    this.us.upload(this.selectedUser.username,data).subscribe((res:any)=>{
+      console.log(res);
+      res = JSON.parse(res._body);
+      this.selectedUser.delName = res.data;
+      console.log(this.selectedUser);
+    },(err:any)=>{
+      console.log(err);
+    })
   }
 
   // To get Data Store By admin
@@ -263,13 +284,11 @@ export class UserComponent implements OnInit {
       res = JSON.parse(res._body);
       if (res.exist) {
 
-        if (res.data[0].delName == '') {
           res.data[0].delName = res.data[0].name;
-        }
 
         this.selectedWeek = res.data[0];
         this.events = res.data[0].events;
-
+        console.log(this.selectedWeek);
         if (this.selectedWeek.spaBlock == '') {
           for (let del of this.dels) {
             if (del.name == this.selectedWeek.delName) {
@@ -294,6 +313,8 @@ export class UserComponent implements OnInit {
           this.selectedWeek.address = this.local.address;
         }
 
+        
+
       } else {
         this.selectedWeek = { address: this.selectedWeek.address, user: this.selectedWeek.user, delName: this.selectedWeek.delName, week: this.selectedWeek.week, spaBlock: this.selectedWeek.spaBlock, timmar: '', events: [] };
         this.showRemain = false;
@@ -302,7 +323,9 @@ export class UserComponent implements OnInit {
         _('#calendar').fullCalendar('addEventSource', this.events);
         this.remainingTimeCal();
       }
+      console.log(this.selectedWeek);
     })
+
   }
 
   pasteEvents() {
@@ -673,12 +696,15 @@ export class UserComponent implements OnInit {
   }
 
   // For Opening Modal For Creation from Admin Account
-  createUser(id) {
+  createUser(id,user?) {
     this.editEvent = false;
     this.alreadyMessage = '';
     this.grantMessage = '';
     this.passwordMessage = false;
     this.passwordMessageNeg = false;
+    if(id == '#changeUserPassword'){
+      this.selectedUserPassword = user;
+    }
     //console.log("ddcsd");
     $(id).modal('show');
   }
@@ -695,6 +721,17 @@ export class UserComponent implements OnInit {
       this.passwordMessageNeg = true;
     }
 
+  }
+
+  changeUserPassword(changeUserPass){
+    if (changeUserPass.value.newPassword.match(/^[0-9a-zA-Z]+$/)) {
+      changeUserPass.value.oldPassword = this.selectedUserPassword.password;
+      this.us.changeUserPassword(changeUserPass.value,this.selectedUserPassword.username).subscribe((res: any) => {
+        this.passwordMessage = true;
+      }, (err: any) => {
+
+      })
+    }
   }
 
   changeCopyPassword(event) {
@@ -1129,6 +1166,11 @@ export class UserComponent implements OnInit {
 
   showSideMenu(status) {
     console.log(status);
-    document.getElementById('sideMenu').style.display = status;
+    if(status){
+      document.getElementById('sideMenu').style.display = 'block';
+    }else{
+      document.getElementById('sideMenu').style.display = 'none';
+    }
+    
   }
 }

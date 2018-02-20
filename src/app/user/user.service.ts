@@ -123,6 +123,10 @@ export class UserService{
         return this.http.post(`${this.urls.url}/changePassword/${localStorage.getItem('username')}`, data);
     }
 
+    changeUserPassword(data,username){
+        return this.http.post(`${this.urls.url}/changeUserPassword/${username}`, data);
+    }
+
     changeCopyPassword(data){
         return this.http.post(`${this.urls.url}/changePassword/${'copyAccess'}`, data);
     }
@@ -130,5 +134,9 @@ export class UserService{
     getAccess(data){
         // var options : RequestOptions = { 'Content-Type' : "application/json"}
         return this.http.post(this.urls.url + `/login`, data)
+    }
+
+    upload(id,data){
+        return this.http.post(this.urls.url+`/upload/${id}`,data);
     }
 }
