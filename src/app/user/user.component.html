@@ -48,6 +48,9 @@
         <div class="col-sm-5">
             <select class="form-control" (change)="weekTemplateChange($event)" [(ngModel)]="selectedWeek.delName" >
                 <!-- <option value="" selected disabled>Select</option> -->
+                <option *ngFor="let week of fixedDels" [value]="week.name">
+                    {{week.name}}
+                </option>
                 <option *ngFor="let week of dels" [value]="week.name">
                     {{week.name}}
                 </option>
@@ -391,8 +394,8 @@
                         <span *ngIf="!edit">
                             <b>{{delName.name}}</b>
                             <br> {{delName.spa}}
-                            <br> {{delName.start}}
-                            <br> {{delName.end}}
+                            <br> {{delName.start | date}}
+                            <br> {{delName.end | date}}
                         </span>
                         <span *ngIf="edit">
                             <div class="col-sm-3">
@@ -424,6 +427,14 @@
                         <span style="border:1px solid black;border-radius:50%; padding : 10px" (click)="edit=true" class="edit-symbol glyphicon glyphicon-pencil">
                         </span>
                         <span (click)="deleteUser(delName,i,'del')" style="border:1px solid black;border-radius:50%; padding : 10px" class="delete-symbol glyphicon glyphicon-trash">
+                        </span>
+                    </div>
+                </li>
+                <li class="list-group-item col-sm-12" *ngFor="let delName of fixedDels;let i = index">
+                    <div class="col-sm-10">
+                        <span *ngIf="!edit">
+                            <b>{{delName.name}}</b>
+                            <br> {{delName.spa}}
                         </span>
                     </div>
                 </li>

@@ -69,6 +69,7 @@ export class UserComponent implements OnInit {
   copyWeek = [{ week: 0, del: '' }];
   timeLeft = 0;
   client;
+  fixedDels  = [];
 
   // Calendar Object
   calendarOptions: Object = {
@@ -212,6 +213,8 @@ export class UserComponent implements OnInit {
           this.addresses.push(r);
         } else if (r.type == 'weeks') {
           this.weeks = r.data;
+        }else if(r.type == 'delName'){
+          this.fixedDels = r.data;
         }
       }
       if (this.user_id != 'admin') {
