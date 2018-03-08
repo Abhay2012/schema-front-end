@@ -1,0 +1,17 @@
+.col-sm-4, .col-sm-8, .col-sm-12{
+    padding-left : 10px !important;
+}
+td{
+    width:50%;
+}
+.positive{
+    color:green;
+}
+
+.negative{
+    color:red;
+}
+
+
+
+

@@ -1,0 +1,728 @@
+<!-- Header -->
+<header></header>
+<br>
+<div [ngSwitch]="tab">
+    <ul style="margin-left:20px;margin-right:20px;background-color:#4aa23a;" class="nav nav-tabs">
+        <li *ngFor="let nav of scs.navBar" role="presentation" (click)="tab=nav.tab;edit=false;" [class.active]="tab == nav.tab">
+            <a>{{nav.title}}</a>
+        </li>
+        <li style="float:right" role="presentation">
+            <a *ngFor="let c of scs.create" (click)="openModal(c.id)" [class.hide]="tab != c.tab"> Create {{c.title}} </a>
+        </li>
+    </ul>
+</div>
+
+<div style="padding:25px" *ngIf="tab == 1">
+    <ul class="list-group">
+        <li class="list-group-item" *ngFor="let user of users;let i = index">
+            <div class="row">
+                <div class="col-sm-7">
+                    <span class="heading">
+                        <b> Username : </b>
+                    </span>
+                    <span *ngIf="!edit"> {{user.username}} </span>
+                    <span>
+                        <input *ngIf="edit" class="form-control" style="width:50%" type="text" [(ngModel)]="users[i].username">
+                    </span>
+                    <br>
+                    <span class="heading">
+                        <b> Name : </b>
+                    </span>
+                    <span *ngIf="!edit"> {{user.name}} </span>
+                    <span>
+                        <input *ngIf="edit" class="form-control" style="width:50%" type="text" [(ngModel)]="users[i].name">
+                    </span>
+                    <br>
+                    <span class="heading">
+                        <b> Adress : </b>
+                    </span>
+                    <span *ngIf="!edit"> {{user.address}} </span>
+                    <span>
+                        <select *ngIf="edit" class="form-control" style="width:50%" [(ngModel)]="users[i].address">
+                            <option selected disabled value="">Select</option>
+                            <option *ngFor="let address of addresses" [value]="address.address">{{address.address}}</option>
+                        </select>
+                    </span>
+                    <br>
+                    <span class="heading">
+                        <b> Email : </b>
+                    </span>
+                    <span *ngIf="!edit"> {{user.email}} </span>
+                    <span>
+                        <input *ngIf="edit" class="form-control" style="width:50%" type="text" [(ngModel)]="users[i].email">
+                    </span>
+                    <br>
+                    <span class="heading">
+                        <b> Phone Number : </b>
+                    </span>
+                    <span *ngIf="!edit"> {{user.phoneNumber}} </span>
+                    <span>
+                        <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="users[i].phoneNumber">
+                    </span>
+                    <br>
+                    <button *ngIf="edit" class="btn btn-primary" (click)="updateUser(user)">Save</button>
+                    <button *ngIf="edit" class="btn " (click)="edit=false">Cancel</button>
+                    <br>
+                    <span class="heading">
+                        <b> Date of Creation : </b>
+                    </span> {{user.createdAt | date}}
+                </div>
+                <div class="col-sm-5">
+                    <span (click)="edit=true" style="border:1px solid black;border-radius:50%; padding : 10px" class="edit-symbol glyphicon glyphicon-pencil">
+                    </span>
+                    <span (click)="userPasswordChange=user.username;openModal('#changeUserPassword')" style="border:1px solid black;border-radius:50%; padding : 10px"
+                        class="edit-symbol glyphicon glyphicon-pencil">
+                    </span>
+                    <span (click)="deleteUser(user,i)" style="border:1px solid black;border-radius:50%; padding : 10px" class="delete-symbol glyphicon glyphicon-trash">
+                    </span>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+
+<div style="padding:25px" *ngIf="tab==2">
+
+    <ul class="list-group">
+        <li class="list-group-item col-sm-12" *ngFor="let address of addresses;let i= index">
+            <div class="col-sm-7">
+                <span *ngIf="!edit"> {{address.address}} </span>
+                <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="addresses[i].address">
+                <br> Open Hours :
+                <span *ngIf="!edit">
+                    {{address.start}} - {{address.end}}
+                </span>
+                <input class="form-control" type="text" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].start">
+                <input class="form-control" type="text" style="width:25%" *ngIf="edit" [(ngModel)]="addresses[i].end">
+                <br>
+                <button *ngIf="edit" class="btn btn-primary" (click)="updateAdminPanel(address)">Save</button>
+                <button *ngIf="edit" class="btn " (click)="edit=false">Cancel</button>
+            </div>
+            <div class="col-sm-5">
+                <span style="border:1px solid black;border-radius:50%; padding : 10px" (click)="edit=true" class="edit-symbol glyphicon glyphicon-pencil">
+                </span>
+                <span (click)="deleteFromAdminPanel(address._id,i,'address')" style="border:1px solid black;border-radius:50%; padding : 10px"
+                    class="delete-symbol glyphicon glyphicon-trash">
+                </span>
+            </div>
+        </li>
+    </ul>
+
+</div>
+<div style="padding:25px" *ngIf="tab==3">
+
+    <ul class="list-group">
+        <li class="list-group-item col-sm-12" *ngFor="let ver of vers;let i =index">
+            <div class="col-sm-7">
+                <span *ngIf="!edit"> {{ver.notes}} </span>
+                <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="vers[i].notes">
+                <br>
+                <button *ngIf="edit" class="btn btn-primary" (click)="updateAdminPanel(ver)">Save</button>
+                <button *ngIf="edit" class="btn " (click)="edit=false">Cancel</button>
+            </div>
+            <div class="col-sm-5">
+                <span style="border:1px solid black;border-radius:50%; padding : 10px" (click)="edit=true" class="edit-symbol glyphicon glyphicon-pencil">
+                </span>
+                <span (click)="deleteFromAdminPanel(ver._id,i,'ver')" style="border:1px solid black;border-radius:50%; padding : 10px" class="delete-symbol glyphicon glyphicon-trash">
+                </span>
+            </div>
+        </li>
+    </ul>
+
+</div>
+<div style="padding:25px" *ngIf="tab==4">
+    <ul class="list-group">
+        <li class="list-group-item col-sm-12" *ngFor="let spa of spas;let i = index">
+            <div class="col-sm-7">
+                <span *ngIf="!edit">
+                    <b> {{spa.code}} </b>
+                </span>
+                <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="spas[i].code">
+
+                <br>
+                <span *ngIf="!edit">
+                    <div *ngFor="let temp of spa.templates">
+                        <div style="display:inline-block;border-radius:50%;width:15px;height:15px" [style.backgroundColor]="temp.color"></div>
+                        {{temp.name.title}}, Timmar - {{temp.hrs}}
+                    </div>
+                </span>
+                <span *ngIf="edit">
+
+                    <div class="col-sm-12">
+                        <div>
+                            <div class="col-sm-4">
+                                Name :
+                                <br> {{spas[i].templates[0].name.title}}
+                            </div>
+                            <div class="col-sm-4">
+                                Timmar :
+                                <input type="number" [(ngModel)]="spas[i].templates[0].hrs" class="form-control">
+                            </div>
+                            <div class="col-sm-4">
+                                Color :
+                                <input type="color" [(ngModel)]="spas[i].templates[0].color" class="form-control">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="col-sm-4">
+                                Name :
+                                <br> {{spas[i].templates[1].name.title}}
+                            </div>
+                            <div class="col-sm-4">
+                                Timmar :
+                                <input type="number" [(ngModel)]="spas[i].templates[1].hrs" class="form-control">
+                            </div>
+                            <div class="col-sm-4">
+                                Color :
+                                <input type="color" [(ngModel)]="spas[i].templates[1].color" class="form-control">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="col-sm-4">
+                                Name :
+                                <br> {{spas[i].templates[2].name.title}}
+                            </div>
+                            <div class="col-sm-4">
+                                Timmar :
+                                <input type="number" [(ngModel)]="spas[i].templates[2].hrs" class="form-control">
+                            </div>
+                            <div class="col-sm-4">
+                                Color :
+                                <input type="color" [(ngModel)]="spas[i].templates[2].color" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <button *ngIf="edit" class="btn btn-primary" (click)="updateAdminPanel(spa)">Spara och uppdatera tid</button>
+                    <button *ngIf="edit" class="btn " (click)="edit=false">Cancel</button>
+                </span>
+            </div>
+            <div class="col-sm-5">
+                <span style="border:1px solid black;border-radius:50%; padding : 10px" (click)="edit=true" class="edit-symbol glyphicon glyphicon-pencil">
+                </span>
+                <span (click)="deleteFromAdminPanel(spa._id,i,'spa')" style="border:1px solid black;border-radius:50%; padding : 10px" class="delete-symbol glyphicon glyphicon-trash">
+                </span>
+            </div>
+        </li>
+    </ul>
+</div>
+<div style="padding:25px" *ngIf="tab==5">
+    <ul class="list-group">
+        <li class="list-group-item col-sm-12" *ngFor="let template of templates;let i = index">
+            <div class="col-sm-7">
+                <span *ngIf="!edit">
+                    <div style="width:15px;height:15px;border-radius:50%;display:inline-block" [style.backgroundColor]="template.color"></div>
+                    <b>{{template.title}}</b>
+                    <br> {{template.notes}}
+                </span>
+                <span *ngIf="edit">
+                    <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="templates[i].title">
+                    <br>
+                    <textarea class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="templates[i].notes"> </textarea>
+                    <br>
+                    <input type="color" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="templates[i].color">
+                </span>
+                <br>
+                <br>
+                <b>Options :</b>
+                <span *ngFor="let option of template.options;let j=index;trackBy : trackFn">
+                    <span *ngIf="!edit"> {{option}} </span>
+                    <span *ngIf="edit">
+                        <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="templates[i].options[j]">
+                        <span *ngIf="template.options.length > 1" class="glyphicon glyphicon-remove" (click)="pop(template.options,j)"></span>
+                        <br>
+                    </span>
+                    <br>
+                </span>
+                <span *ngIf="edit" class="glyphicon glyphicon-plus" (click)="push(template.options,'')"></span>
+                <br>
+                <br>
+                <button *ngIf="edit" class="btn btn-primary" (click)="updateAdminPanel(template)">Save</button>
+                <button *ngIf="edit" class="btn " (click)="edit=false">Cancel</button>
+            </div>
+            <div class="col-sm-5">
+                <span style="border:1px solid black;border-radius:50%; padding : 10px" (click)="edit=true" class="edit-symbol glyphicon glyphicon-pencil">
+                </span>
+                <span (click)="deleteFromAdminPanel(template._id,i,'template')" style="border:1px solid black;border-radius:50%; padding : 10px"
+                    class="delete-symbol glyphicon glyphicon-trash">
+                </span>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div style="padding:25px" *ngIf="tab==6">
+    <label for="">Select User</label>
+    <button class="btn btn-primary" style="float:right" (click)="openModal('#copyDel')">Flytta</button>
+    <select style="width:50%" [(ngModel)]="selectedUser" (change)="getDelNames($event)" class="form-control">
+        <!-- <option selected disabled value="">Select</option> -->
+        <option *ngFor="let user of users" [value]="user.username">{{user.username}}</option>
+    </select>
+    <br>
+
+    <ul class="list-group" *ngIf="selectedUser">
+
+        <li class="list-group-item">
+            <div class="col-sm-3">
+                <input type="file" #file>
+            </div>
+            <button class="btn btn-primary" (click)="uploadDelNames(file,selectedUser)">Upload</button>
+        </li>
+        <br>
+        <li class="list-group-item" style="overflow: hidden" *ngFor="let del of newDelNames;let i=index">
+            <div class="col-sm-3">
+                <label for="">Name</label>
+                <input type="text" class="form-control" [(ngModel)]="del.name">
+            </div>
+            <div class="col-sm-3">
+                <label for="">SpårOchBlock</label>
+                <select type="text" class="form-control" [(ngModel)]="del.spa">
+                    <option disabled selected value="">Select</option>
+                    <option *ngFor="let spa of spas" [value]="spa.code">{{spa.code}}</option>
+                </select>
+            </div>
+            <div class="col-sm-3">
+                <label for="">Start</label>
+                <input type="date" class="form-control" [(ngModel)]="del.start">
+            </div>
+            <div class="col-sm-3">
+                <label for="">End</label>
+                <input type="date" class="form-control" [(ngModel)]="del.end">
+            </div>
+            <span *ngIf="newDelNames.length>1" class="glyphicon glyphicon-remove" style="float:right" (click)="pop(newDelNames,i)"></span>
+        </li>
+        <span class="glyphicon glyphicon-plus" (click)="push(newDelNames,scs.newDelName)"></span>
+    </ul>
+    <button *ngIf="selectedUser" class="btn btn-primary" [disabled]="newDelNames[0].name == ''" (click)="addDelName(selectedUser)">
+        Submit</button>
+    <br>
+    <ul class="list-group" *ngIf="selectedUser">
+        <li class="list-group-item col-sm-12" *ngFor="let delName of delNames;let i = index">
+            <div class="col-sm-10">
+                <span *ngIf="!edit">
+                    <b>{{delName.name}}</b>
+                    <br> {{delName.spa}}
+                    <br> {{delName.start | date}}
+                    <br> {{delName.end | date}}
+                </span>
+                <span *ngIf="edit">
+                    <div class="col-sm-3">
+                        <label for="">Name</label>
+                        <input type="text" class="form-control" [(ngModel)]="delName.name">
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="">SpårOchBlock</label>
+                        <select type="text" class="form-control" [(ngModel)]="delName.spa">
+                            <option disabled selected value="">Select</option>
+                            <option *ngFor="let spa of spas" [value]="spa.code">{{spa.code}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="">Start</label>
+                        <input type="date" class="form-control" [(ngModel)]="delName.start">
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="">End</label>
+                        <input type="date" class="form-control" [(ngModel)]="delName.end">
+                    </div>
+                </span>
+                <br>
+                <br>
+                <button *ngIf="edit" class="btn btn-primary" (click)="updateDelName(delName)">Save</button>
+                <button *ngIf="edit" class="btn " (click)="edit=false">Cancel</button>
+            </div>
+            <div class="col-sm-2">
+                <span style="border:1px solid black;border-radius:50%; padding : 10px" (click)="edit=true" class="edit-symbol glyphicon glyphicon-pencil">
+                </span>
+                <span (click)="deleteDelName(delName.id,i)" style="border:1px solid black;border-radius:50%; padding : 10px" class="delete-symbol glyphicon glyphicon-trash">
+                </span>
+            </div>
+        </li>
+        <li class="list-group-item col-sm-12" *ngFor="let delName of fixedDels;let i = index">
+            <div class="col-sm-10">
+                <span *ngIf="!edit">
+                    <b>{{delName.name}}</b>
+                    <br> {{delName.spa}}
+                </span>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div style="padding:25px" *ngIf="tab==7">
+    <div class="col-sm-12">
+        <div class="col-sm-6">
+            <label for="">Select Template</label>
+            <select class="form-control" [(ngModel)]="selectedEventTemplate" (change)="remainingTime()">
+                <option selected disabled [ngValue]="{}">Select</option>
+                <option *ngFor="let et of eventsTemplates" [ngValue]="et">{{et.title}} - {{et.address}}</option>
+            </select>
+        </div>
+        <div class="col-sm-5">
+            <form #eventsTemplateForm=ngForm>
+                <label for="">Create Template</label>
+                <input type="text" class="form-control" ngModel name="title">
+                <br>
+                <select class="form-control" ngModel name="spa">
+                    <option value="" selected disabled>Select</option>
+                    <option *ngFor="let spa of spas" [value]="spa.code">{{spa.code}}</option>
+                </select>
+                <br>
+                <select class="form-control" ngModel name="address">
+                    <option value="" selected disabled>Select</option>
+                    <option *ngFor="let address of addresses" [value]="address.address">{{address.address}}</option>
+                </select>
+            </form>
+        </div>
+        <div class="col-sm-1">
+            <input type="submit" (click)="createEventsTemplate(eventsTemplateForm.value)" [disabled]="eventsTemplateForm.title == '' || eventsTemplateForm.spa == ''"
+                class="btn btn-primary">
+        </div>
+    </div>
+    <br>
+    <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+
+    <span *ngIf="timeRemain.length">
+        tid kvar att sätta ut :
+        <br>
+        <span *ngFor="let r of timeRemain" [style.color]="r.color">
+            {{r.title}} : {{r.duration}}
+        </span>
+    </span>
+    <calendar #calendar [events]="selectedEventTemplate.events" [templates]="templates" [timeRemain]="timeRemain" [weekId]="selectedEventTemplate._id"></calendar>
+    <br>
+    <button class="btn btn-danger" (click)="deleteEventsTemplate()">Delete</button>
+</div>
+<!---------------------------------------------------------------------------------->
+<!-------------------------------------- MODALS ------------------------------------>
+<!---------------------------------------------------------------------------------->
+<!-- Create User Modal -->
+<div class="modal fade" id="createUser" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Create User</h4>
+            </div>
+            <div class="modal-body">
+                <form #userform=ngForm (submit)="createUser(userform)">
+
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" ngModel name="username">
+
+                    <label for="username">Name</label>
+                    <input type="text" class="form-control" ngModel name="name">
+
+                    <label for="address">Address</label>
+                    <select class="form-control" name="address" ngModel>
+                        <option disabled selected value="">Select</option>
+                        <option *ngFor="let address of addresses" [value]="address.address">{{address.address}}</option>
+                    </select>
+
+                    <label for="username">Email</label>
+                    <input type="email" class="form-control" ngModel name="email">
+
+                    <label for="username">Phone Number</label>
+                    <input type="number" class="form-control" ngModel name="phoneNumber">
+
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" ngModel name="password">
+                    <br>
+                    <input type="submit" class="btn btn-primary" value="submit">
+                    <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+                    <!-- <p *ngIf="!already">{{alreadyessage}}</p> -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <!-- <button type="button" class="btn btn-primary">Save</button> -->
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+
+<!-- Create Address -->
+<div class="modal fade" id="createAddress" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Create Address</h4>
+            </div>
+            <div class="modal-body">
+                <form #addressform=ngForm (submit)="addAdminPanel(addressform,'address')">
+
+                    <label for="address">Address</label>
+                    <input type="text" class="form-control" ngModel name="address">
+                    <br>
+                    <b> Open Hours : </b>
+                    <br>
+                    <label for="">Start</label>
+                    <input type="text" class="form-control" ngModel name="start">
+                    <br>
+                    <label for="">End</label>
+                    <input type="text" class="form-control" ngModel name="end">
+
+                    <input type="submit" class="btn btn-primary" value="submit">
+                    <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+                    <!-- <p *ngIf="!already">{{alreadyessage}}</p> -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <!-- <button type="button" class="btn btn-primary">Save</button> -->
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<!-- Create Vers Modal -->
+<div class="modal fade" id="createVer" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Create Verktyg</h4>
+            </div>
+            <div class="modal-body">
+                <form #verform=ngForm (submit)="addAdminPanel(verform,'ver')">
+
+                    <label for="notes">Anteckningar</label>
+                    <textarea type="text" class="form-control" ngModel name="notes">
+                    </textarea>
+                    <br>
+                    <input type="submit" class="btn btn-primary" value="submit">
+                    <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+                    <!-- <p *ngIf="!already">{{alreadyessage}}</p> -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <!-- <button type="button" class="btn btn-primary">Save</button> -->
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<!-- Create Spas Modal -->
+<div class="modal fade" id="createSpa" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Add SpårOchBlock</h4>
+            </div>
+            <div class="modal-body">
+                <form #spaform=ngForm (submit)="addAdminPanel(spaform,'spa')">
+
+                    <label for="username">SpårOchBlock Code</label>
+                    <input type="text" class="form-control" ngModel name="code">
+                    <br>
+
+                    <div class="col-sm-12">
+                        <label for="">Mallar 1</label>
+                        <div>
+
+                            <div class="col-sm-4">
+                                Name :
+                                <select [ngModelOptions]="{standalone:true}" [(ngModel)]="scs.spaBlockTemplates[0].name" class="form-control">
+                                    <option selected disabled value="">Select</option>
+                                    <option *ngFor="let temp of templates" [ngValue]="{ title : temp.title, id : temp._id }">{{temp.title}}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                Timmar :
+                                <input type="number" [ngModelOptions]="{standalone:true}" [(ngModel)]="scs.spaBlockTemplates[0].hrs" class="form-control">
+                            </div>
+                            <div class="col-sm-4">
+                                Color :
+                                <input type="color" [ngModelOptions]="{standalone:true}" [(ngModel)]="scs.spaBlockTemplates[0].color" class="form-control">
+                            </div>
+                        </div>
+                        <label for="">Mallar 2</label>
+                        <div>
+
+                            <div class="col-sm-4">
+                                Name :
+                                <select [ngModelOptions]="{standalone:true}" [(ngModel)]="scs.spaBlockTemplates[1].name" class="form-control">
+                                    <option selected disabled value="">Select</option>
+                                    <option *ngFor="let temp of templates" [ngValue]="{ title : temp.title, id : temp._id }">{{temp.title}}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                Timmar :
+                                <input type="number" [(ngModel)]="scs.spaBlockTemplates[1].hrs" [ngModelOptions]="{standalone:true}" class="form-control">
+                            </div>
+                            <div class="col-sm-4">
+                                Color :
+                                <input type="color" [ngModelOptions]="{standalone:true}" [(ngModel)]="scs.spaBlockTemplates[1].color" class="form-control">
+                            </div>
+                        </div>
+                        <label for="">Mallar 3</label>
+                        <div>
+
+                            <div class="col-sm-4">
+                                Name :
+                                <select [ngModelOptions]="{standalone:true}" [(ngModel)]="scs.spaBlockTemplates[2].name" class="form-control">
+                                    <option selected disabled value="">Select</option>
+                                    <option *ngFor="let temp of templates" [ngValue]="{ title : temp.title, id : temp._id }">{{temp.title}}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                Timmar :
+                                <input type="number" [(ngModel)]="scs.spaBlockTemplates[2].hrs" class="form-control" [ngModelOptions]="{standalone:true}">
+                            </div>
+                            <div class="col-sm-4">
+                                Color :
+                                <input type="color" [(ngModel)]="scs.spaBlockTemplates[2].color" class="form-control" [ngModelOptions]="{standalone:true}">
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <br>
+                    <input type="submit" class="btn btn-primary" value="submit">
+                    <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- /.modal -->
+<!-- Create Template Modal -->
+<div class="modal fade" id="createTemp" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Skapa Aktivitet</h4>
+            </div>
+            <div class="modal-body">
+                <form #tempform=ngForm (submit)="addAdminPanel(tempform,'template')">
+                    <label for="title">Title</label>
+                    <input type="title" class="form-control" ngModel required name="title">
+                    <label for="color">Color</label>
+                    <input type="color" class="form-control" ngModel required name="color">
+                    <label for="notes">Anteckningar</label>
+                    <textarea type="text" class="form-control" ngModel name="notes">
+                    </textarea>
+                    <span *ngFor="let option of options;let i =index; trackBy:trackFn">
+                        <label for=""> Option {{i+1}} </label>
+                        <input type="text" style="display:inline-block;width:95%" class="form-control" [ngModelOptions]="{standalone:true}" [(ngModel)]="options[i]">
+                        <span *ngIf="options.length > 1" class="glyphicon glyphicon-remove" (click)="pop(options,i)"></span>
+                    </span>
+                    <br>
+                    <span class="glyphicon glyphicon-plus" (click)="push(options,'')"></span>
+                    <br>
+                    <input type="submit" class="btn btn-primary" [disabled]="tempform.invalid" value="submit">
+                    <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+                    <!-- <p *ngIf="!already">{{alreadyessage}}</p> -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <!-- <button type="button" class="btn btn-primary">Save</button> -->
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+<div class="modal fade" id="copyDel" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Flytta</h4>
+            </div>
+            <div class="modal-body">
+                <form #copy=ngForm>
+                    <label for="">From :</label>
+                    <select ngModel name="from" (change)="getCopyDelNames(copy.value)" class="form-control">
+                        <!-- <option selected disabled value="">Select</option> -->
+                        <option *ngFor="let user of users" [value]="user.username">{{user.username}}</option>
+                    </select>
+                    <ul class="list-group">
+                        <li class="list-group-item" *ngFor="let dels of copyDelNames;let i = index">
+                            {{dels.name}}
+                            <span class="glyphicon glyphicon-remove" (click)="pop(copyDelNames,i)" style="float:right"></span>
+                        </li>
+                    </ul>
+
+                    <label for="">To :</label>
+                    <select ngModel name="to" class="form-control">
+                        <!-- <option selected disabled value="">Select</option> -->
+                        <option *ngFor="let user of users" [value]="user.username">{{user.username}}</option>
+                    </select>
+                    <button type="button" (click)="moveDelNames(copy.value)" class="btn btn-warning">Flytta</button>
+                </form>
+                <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+                <!-- <p *ngIf="pasteMessage" style="text-align:center;color:green">Kopiering slutförd utan problem</p> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="changeUserPassword" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Change Password</h4>
+            </div>
+            <div class="modal-body">
+                <form #changeUserPass=ngForm>
+                    <label for="">New Password</label>
+                    <input type="password" class="form-control" ngModel name="newPassword">
+                    <p>* Password Can Only contain A-Z, a-z, 0-9</p>
+                    <br>
+                    <input type="submit" (click)="changeUserPassword(changeUserPass)" class="btn btn-primary">
+                </form>
+                <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+                <!-- <p *ngIf="passwordMessage" style="text-align:center;color:green">Password Updated</p> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->

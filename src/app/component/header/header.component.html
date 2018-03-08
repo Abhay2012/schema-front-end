@@ -1,0 +1,150 @@
+<div>
+    <nav id="nav" style="background-color:black;height:50px;">
+      <h3 class="col-sm-11" style="color:#ecebee;margin-top:0;margin-bottom:0;padding:12px;"> Schema  </h3>
+      <span class="glyphicon glyphicon-chevron-down" (click)="showSideMenu()" style="float:right;font-size:12px;top:10px;right:10px;color:white"></span>
+    </nav>
+    <ul id="sideMenu" (click)="showSideMenu()" style="padding:0px;position:fixed;right:0;background-color:white;display:none;cursor:pointer;z-index:1000">
+        <li class="sideMenu-item" (click)="openModal('#changePassword')">
+            Change Password
+        </li>
+        <li *ngIf="localStorage.username=='admin'" class="sideMenu-item"  (click)="openModal('#changeCopyPassword')">
+            Change Copy Password
+        </li>
+        <li *ngIf="localStorage.username!='admin'" class="sideMenu-item" (click)="openModal('#getAccess')" >
+            Full behörighet
+        </li>
+        <li *ngIf="localStorage.username!='admin'" class="sideMenu-item" (click)="openModal('#copyAccess')">
+            Kopierings behörighet
+        </li>
+        <li (click)="logout()" class="sideMenu-item">
+            Logout
+        </li>
+    </ul>
+</div>
+<img style="width: 60px;z-index: 1000;margin-top:10px;margin-left:10px" src="assets/icon.ico" alt="">
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePassword" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Change Password</h4>
+            </div>
+            <div class="modal-body">
+                <form #changePasword=ngForm>
+                    <label for="">Current Password</label>
+                    <input type="password" class="form-control" ngModel name="oldPassword">
+                    <br>
+                    <label for="">New Password</label>
+                    <input type="password" class="form-control" ngModel name="newPassword">
+                    <p>* Password Can Only contain A-Z, a-z, 0-9</p>
+                    <br>
+                    <input type="submit" (click)="changePassword(changePasword)" class="btn btn-primary">
+                </form>
+                <p  style="text-align:center;" [style.Color]="responseColor">{{responseMessage}}</p>    
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+
+<!-- Get Access -->
+<div class="modal fade" id="getAccess" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Grant Access</h4>
+            </div>
+            <div class="modal-body">
+                <form #changedForm=ngForm>
+                    <label for="">Enter Password</label>
+                    <input type="password" class="form-control" ngModel name="password">
+                    <br>
+                    <input type="submit" (click)="getAccess(changedForm)" class="btn btn-primary">
+                </form>
+                <p  style="text-align:center;" [style.Color]="responseColor">{{responseMessage}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+
+<div class="modal fade" id="copyAccess" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Grant Access</h4>
+            </div>
+            <div class="modal-body">
+                <form #changeForm=ngForm>
+                    <label for="">Enter Password</label>
+                    <input type="password" class="form-control" ngModel name="password">
+                    <br>
+                    <input type="submit" (click)="copyAccess(changeForm)" class="btn btn-primary">
+                </form>
+                <p  style="text-align:center;" [style.Color]="responseColor">{{responseMessage}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="changeCopyPassword" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Change Password</h4>
+            </div>
+            <div class="modal-body">
+                <form #changeCopyPass=ngForm>
+                    <label for="">Current Password</label>
+                    <input type="password" class="form-control" ngModel name="oldPassword">
+                    <br>
+                    <label for="">New Password</label>
+                    <input type="password" class="form-control" ngModel name="newPassword">
+                    <p>* Password Can Only contain A-Z, a-z, 0-9</p>
+                    <br>
+                    <input type="submit" (click)="changeCopyPassword(changeCopyPass)" class="btn btn-primary">
+                </form>
+                <p  style="text-align:center;" [style.Color]="responseColor">{{responseMessage}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->

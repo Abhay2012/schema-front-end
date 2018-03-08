@@ -1,0 +1,117 @@
+<div>
+    <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+    <button class="btn btn-primary" (click)="updateResizeDropEvents()">Spara</button>
+</div>
+<br>
+<angular2-fullcalendar id="calendar" [options]="calendarOptions"></angular2-fullcalendar>
+
+<!-- Modals -->
+<!-- Create Event -->
+<div class="modal fade" id="createEvent" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Skapa Aktivitet</h4>
+            </div>
+            <div class="modal-body">
+                <form #eventform=ngForm (submit)="createEvent(eventform)">
+                    <label for="title">Mallar</label>
+                    <select class="form-control" required name="template" ngModel id="">
+                        <option selected disabled value="">
+                            Select
+                        </option>
+                        <option *ngFor="let temp of templates" [ngValue]="temp">
+                            {{temp.title}}
+                        </option>
+                    </select>
+                    <span *ngIf="eventform.controls['template'] && eventform.controls['template'].value && eventform.controls['template'].value.options[0]!=''">
+                        <br>
+                        <label for="title">Role</label>
+                        <select name="role" class="form-control" ngModel id="">
+                            <option value="" selected disabled>Select</option>
+                            <option *ngFor="let role of eventform.controls['template'].value.options" [value]="role">
+                                {{role}}
+                            </option>
+                        </select>
+                    </span>
+                    <br>
+                    <label for="date">Datum</label>
+                    <input type="date" class="form-control" [(ngModel)]="eventDate" [ngModelOptions]="{standalone: true}" name="date">
+                    <br>
+                    <div class="col-sm-6">
+                        <label for="date">Start tid</label>
+                        <input type="time" class="form-control" min="08:00:00" max="16:00:00" ngModel required value="00:00" name="startTime">
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="date">Slut Tid</label>
+                        <input type="time" class="form-control" min="08:00:00" max="16:00:00" ngModel required value="00:00" name="endTime">
+                    </div>
+                    <br>
+                    <label for="notes">Anteckningar</label>
+                    <textarea type="text" class="form-control" ngModel name="notes">
+                        </textarea>
+
+                    <br>
+                    <input type="submit" class="btn btn-primary" [disabled]="eventform.invalid || (scs.selectedWeek.delName=='' && localStorage.username != 'admin') || eventform.value.startTime >= eventform.value.endTime"
+                        value="submit">
+                    <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+                    <!-- <p *ngIf="!already">{{alreadyessage}}</p> -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <!-- <button type="button" class="btn btn-primary">Save</button> -->
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<!-- Open Event -->
+<div class="modal fade" id="openEvent" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 *ngIf="selectedEvent['data']" class="modal-title">{{selectedEvent['data']['title']}}</h4>
+            </div>
+            <div class="modal-body">
+                <b>Role :</b>
+                <div *ngIf="editEvent">
+                    <div *ngFor="let temp of templates">
+                        <span *ngIf="temp.title == selectedEvent.data.title.trim()">
+                            <select [(ngModel)]="selectedEvent['data']['role']" class="form-control">
+                                <option *ngFor="let op of temp.options" [value]="op">{{op}}</option>
+                            </select>
+                        </span>
+                    </div>
+                </div>
+                <span *ngIf="selectedEvent['data'] && selectedEvent['data']['role'] && !editEvent"> {{selectedEvent['data']['role']}} </span>
+                <br>
+                <b>Anteckningar :</b>
+                <span *ngIf="localStorage.username != 'admin'" (click)="editEvent = true" class="glyphicon glyphicon-pencil"></span>
+                <br>
+                <span *ngIf="selectedEvent['data'] && selectedEvent['data']['notes'] && !editEvent"> {{selectedEvent['data']['notes']}} </span>
+                <textarea *ngIf="editEvent" class="form-control" [(ngModel)]="selectedEvent['data']['notes']">
+
+                </textarea>
+                <br>
+                <button *ngIf="editEvent" (click)="updateEvent()" class="btn btn-primary">Update</button>
+                <br>
+                <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+                <button type="button" (click)="deleteEvent()" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

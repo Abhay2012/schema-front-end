@@ -1,0 +1,23 @@
+.hide{
+    display: none
+}
+a{
+    cursor: pointer;
+    color : white;
+}
+
+a:hover{
+    color : green;
+}
+
+span.edit-symbol:hover{
+    background-color : #008080;
+    border-color : #008080 !important;
+    color:white;
+}
+
+span.delete-symbol:hover{
+    background-color : red;
+    border-color : red !important;
+    color:white;
+}
