@@ -131,7 +131,10 @@
         </div>
     </div>
 </div>
-<button class="btn btn-primary" style="float:right" *ngIf="localStorage.copy_access != 'false' || localStorage.grant_access != 'false'" [disabled]="scs.lock" (click)="openModal('#selectTemplate')">Choose Template</button>
+
+<button class="btn btn-primary" style="float:right" (click)="getAccess()" *ngIf="localStorage.showEventsTemplate == 'false'">Get Access</button>
+<!-- <span style="float:right;margin-top:20px" [style.color]="responseColor">{{responseMessage}}</span> -->
+<button class="btn btn-primary" style="float:right" *ngIf="localStorage.showEventsTemplate != 'false'" [disabled]="scs.lock" (click)="copyWarning()">Mallar</button>
 <div style="padding:10px">
     <calendar #calendar [events]="scs.selectedWeek.events" [templates]="templates" [timeRemain]="timeRemain" [weekId]="selectedWeekId" (getSelectedWeek)="getSelectedWeek()" ></calendar>
 </div>

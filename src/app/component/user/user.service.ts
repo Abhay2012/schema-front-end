@@ -41,6 +41,9 @@ export class UserService {
         return this.http.post(`${this.urls.url}/setTemplate/${week}/${localStorage.getItem('username')}/${delName}`,data).map(res=>res.json());
     }
 
+    getAccess(){
+        return this.http.get(`${this.urls.url}/getAccess/${localStorage.getItem('username')}`).map(res=>res.json());
+    }
 
 
 

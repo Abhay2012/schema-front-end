@@ -60,6 +60,13 @@
                         <input type="text" class="form-control" style="width:50%" *ngIf="edit" [(ngModel)]="users[i].phoneNumber">
                     </span>
                     <br>
+                    <span class="heading">
+                        <b> Mallar : </b>                        
+                        
+                    </span>
+                    <span *ngIf="!edit"> {{user.showEventsTemplate ? 'visible' : 'hidden'}} </span>
+                    <input *ngIf="edit" type="checkbox" [(ngModel)]="users[i].showEventsTemplate" (click)="users[i].showEventsTemplate = !users[i].showEventsTemplate;func(i)" >
+                    <br>
                     <button *ngIf="edit" class="btn btn-primary" (click)="updateUser(user)">Save</button>
                     <button *ngIf="edit" class="btn " (click)="edit=false">Cancel</button>
                     <br>

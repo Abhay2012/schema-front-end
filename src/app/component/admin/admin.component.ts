@@ -48,6 +48,7 @@ export class AdminComponent {
                 else if (r._id == 'spa') this.spas = r.data;
                 else if (r._id == 'eventsTemplate') this.eventsTemplates = r.data;
             }
+            this.sort(this.eventsTemplates,'address');
         }, (err: any) => {
 
         })
@@ -249,6 +250,16 @@ export class AdminComponent {
         $(id).modal('show');
     }
 
+    sort(array, by) {
+        array.sort((a, b) => {
+            if (a[by] < b[by]) {
+                return -1;
+            } else {
+                return 1;
+            }
+        })
+    }
+
     setResetMessage(message,color){
         this.responseColor = color;
         this.responseMessage = message;
@@ -256,5 +267,9 @@ export class AdminComponent {
           this.responseColor = "transparent";
           this.responseMessage = "";
         },2000);
+    }
+
+    func(i){
+        console.log(this.users[i].showEventsTemplate);
     }
 }

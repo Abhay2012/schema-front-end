@@ -25,6 +25,7 @@ export class LoginComponent {
                 localStorage.setItem('username', res.username);
                 localStorage.setItem('name', res.name);
                 localStorage.setItem('address', res.data.address);
+                if(res.username != 'admin') localStorage.setItem('showEventsTemplate', res.data.showEventsTemplate);
                 this.router.navigate(['user', res.username]);
             } else {
                 this.message = res.message;

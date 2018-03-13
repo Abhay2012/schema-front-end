@@ -29,7 +29,7 @@ export class UserComponent implements OnInit {
     localStorage: any;
     timeRemain: any = [];
     options: any[] = [''];
-    selectedWeekId : any;
+    selectedWeekId: any;
 
     constructor(private us: UserService, public scs: StaticContentService) {
         this.getAdminPanel();
@@ -54,13 +54,13 @@ export class UserComponent implements OnInit {
                 else if (r._id == 'spa') this.spas = r.data;
                 else if (r._id == 'weeks') this.weeks = r.data[0].data;
                 else if (r._id == 'eventsTemplate') {
-                    this.eventsTemplates = r.data.filter((template)=>{ return this.localStorage.address == template.address});
+                    this.eventsTemplates = r.data.filter((template) => { return this.localStorage.address == template.address });
                     this.allEventsTemplates = JSON.parse(JSON.stringify(this.eventsTemplates));
                 }
                 else if (r._id == 'address') {
                     this.addresses = r.data;
                     var userAddress = this.addresses.filter((address) => { return this.localStorage.address == address.address })
-                    if(userAddress[0]) localStorage.setItem('oppe', `${userAddress[0].start} - ${userAddress[0].end}`);
+                    if (userAddress[0]) localStorage.setItem('oppe', `${userAddress[0].start} - ${userAddress[0].end}`);
                 }
             }
         }, (err: any) => {
@@ -84,7 +84,7 @@ export class UserComponent implements OnInit {
         this.scs.selectedWeek.spaBlock = this.delNames.filter((delName) => {
             return delName.name == this.scs.selectedWeek.delName
         })[0].spa;
-        this.eventsTemplates = this.eventsTemplates.filter( (eventTemplate) => { return eventTemplate.spa == this.scs.selectedWeek.spaBlock} )
+        this.eventsTemplates = this.eventsTemplates.filter((eventTemplate) => { return eventTemplate.spa == this.scs.selectedWeek.spaBlock })
         this.scs.selectedWeek.timmar = 0;
         this.setTimmar();
         this.getSelectedWeek();
@@ -101,17 +101,17 @@ export class UserComponent implements OnInit {
     }
 
     getSelectedWeek() {
-        this.calendar.jumpDate(this.getStartDate(typeof this.scs.selectedWeek.week == 'string'? parseInt(this.scs.selectedWeek.week):this.scs.selectedWeek.week));
+        this.calendar.jumpDate(this.getStartDate(typeof this.scs.selectedWeek.week == 'string' ? parseInt(this.scs.selectedWeek.week) : this.scs.selectedWeek.week));
         this.us.getSelectedWeek(this.scs.selectedWeek.week, this.scs.selectedWeek.delName).subscribe((res: any) => {
-            if(res.exist) this.selectedWeekId = res.data[0]._id;
-            
+            if (res.exist) this.selectedWeekId = res.data[0]._id;
+
             this.scs.lock = !res.exist;
             if (res.data[0] && res.data[0].spaBlock != '' && res.data[0].spaBlock != this.scs.selectedWeek.spaBlock) {
                 this.scs.selectedWeek.spaBlock = res.data[0].spaBlock;
                 this.scs.selectedWeek.timmar = 0;
                 this.setTimmar();
             }
-            if (res.data[0]) this.scs.selectedWeek.events = res.data[0].events;
+            this.scs.selectedWeek.events = res.data[0] ? res.data[0].events : [];
             this.timeRemain = [];
             this.remainingTime();
             this.calendar.events = this.scs.selectedWeek.events;
@@ -160,18 +160,20 @@ export class UserComponent implements OnInit {
 
     deleteTemplate(template) {
         this.us.deleteTemplate(template.id).subscribe((res: any) => {
-          this.templates.splice(this.templates.indexOf(template), 1);
+            this.templates.splice(this.templates.indexOf(template), 1);
         }, (err: any) => {
-    
+
         })
     }
 
-    setTemplate(form){
-        this.us.setTemplate(this.scs.selectedWeek.week,this.scs.selectedWeek.delName,form.value.template).subscribe((res:any)=>{
-            this.setResetMessage(res.message, res.color)
+    setTemplate(form) {
+        this.us.setTemplate(this.scs.selectedWeek.week, this.scs.selectedWeek.delName, form.value.template).subscribe((res: any) => {
+            this.setResetMessage(res.message, res.color);
             this.calendar.events = res.data;
             this.calendar.renderEvents();
-        },(err:any)=>{
+            this.scs.selectedWeek.events = res.data;
+            this.remainingTime();
+        }, (err: any) => {
 
         })
     }
@@ -191,6 +193,17 @@ export class UserComponent implements OnInit {
         }
     }
 
+    copyWarning() {
+        if (this.scs.selectedWeek.events.length > 0) {
+            var confirm = window.confirm("Detta kommer skrivare över nuvarande kalender");
+            if (confirm) {
+                this.openModal('#selectTemplate');
+            }
+        }else{
+            this.openModal('#selectTemplate');
+        }
+    }
+
     openModal(id) {
         this.responseMessage = '';
         this.responseColor = 'transparent';
@@ -207,12 +220,21 @@ export class UserComponent implements OnInit {
         })
     }
 
-    getStartDate(weekNo:number) {
+    getStartDate(weekNo: number) {
         var year = (new Date()).getFullYear();
         var d = new Date(`${year}-01-01`);
         var w = d.getTime() + 604800000 * (weekNo - 1);
         var n1 = new Date(w);
         return n1;
+    }
+
+    getAccess() {
+        this.us.getAccess().subscribe((res: any) => {
+            this.localStorage.setItem('showEventsTemplate', res.data);
+            this.setResetMessage(res.message, res.color);
+        }, (err: any) => {
+
+        })
     }
 
     push(array, value) {
