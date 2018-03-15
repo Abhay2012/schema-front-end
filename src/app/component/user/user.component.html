@@ -9,7 +9,7 @@
         <select class="form-control" [(ngModel)]="scs.selectedWeek.delName" (change)="setSpaBlock()">
             <option value="" selected disabled>Select</option>
             <option *ngFor="let delName of delNames" [value]="delName.name">
-                {{delName.name}}
+                {{delName.name}} - {{delName.spa}}
             </option>
         </select>
     </div>

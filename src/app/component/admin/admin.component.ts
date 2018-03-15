@@ -19,7 +19,7 @@ export class AdminComponent {
     addresses: any[];
     templates: any[];
     fixedDels: any[];
-    eventsTemplates : any[]=[];
+    eventsTemplates: any[] = [];
     edit: boolean = false;
     delNames;
     newDelNames: any[] = [];
@@ -48,7 +48,11 @@ export class AdminComponent {
                 else if (r._id == 'spa') this.spas = r.data;
                 else if (r._id == 'eventsTemplate') this.eventsTemplates = r.data;
             }
-            this.sort(this.eventsTemplates,'address');
+            // this.eventsTemplates.sort(this.orderByProperty('address','title'));
+            this.eventsTemplates = this.sortEventsTemplate(this.eventsTemplates, 'address', 'title');
+            console.log(" sd", this.eventsTemplates);
+            // this.sort(this.eventsTemplates,'spa');
+            // this.sort(this.eventsTemplates,'title');
         }, (err: any) => {
 
         })
@@ -105,7 +109,7 @@ export class AdminComponent {
 
     moveDelNames(form) {
         this.as.moveDelNames(form.to, form.from, this.copyDelNames).subscribe((res: any) => {
-            this.setResetMessage(res.message,res.color)
+            this.setResetMessage(res.message, res.color)
         }, (err: any) => {
 
         })
@@ -140,7 +144,7 @@ export class AdminComponent {
     createUser(form) {
         this.as.createUser(form.value).subscribe((res: any) => {
             console.log(res);
-            this.setResetMessage(res.message,res.color);
+            this.setResetMessage(res.message, res.color);
             this.users.push(form.value);
         }, (err: any) => {
 
@@ -155,7 +159,7 @@ export class AdminComponent {
         }
         if (str == 'spa') form.value.templates = this.scs.spaBlockTemplates;
         this.as.addAdminPanel(form.value).subscribe((res: any) => {
-            this.setResetMessage(res.message,res.color);
+            this.setResetMessage(res.message, res.color);
             if (str == 'template') this.templates.push(form.value);
             else if (str == 'address') this.addresses.push(form.value);
             else if (str == 'ver') this.vers.push(form.value);
@@ -185,36 +189,35 @@ export class AdminComponent {
     changeUserPassword(changeUserPass) {
         if (changeUserPass.value.newPassword.match(/^[0-9a-zA-Z]+$/)) {
             this.as.changeUserPassword(changeUserPass.value, this.userPasswordChange).subscribe((res: any) => {
-                this.setResetMessage(res.message,res.color);
+                this.setResetMessage(res.message, res.color);
             }, (err: any) => {
 
             })
         }
     }
 
-    createEventsTemplate(eventsTemplateForm){
+    createEventsTemplate(eventsTemplateForm) {
         console.log(eventsTemplateForm);
         eventsTemplateForm['type'] = "eventsTemplate";
         eventsTemplateForm['events'] = [];
-        this.as.createEventsTemplate(eventsTemplateForm).subscribe((res :any) => {
-            this.setResetMessage(res.message,res.color);
+        this.as.createEventsTemplate(eventsTemplateForm).subscribe((res: any) => {
+            this.setResetMessage(res.message, res.color);
             this.eventsTemplates.push(res.data);
-        }, (err:any)=>{
+        }, (err: any) => {
 
-        } )
+        })
     }
 
-    deleteEventsTemplate(){
-        this.as.deleteEventsTemplate(this.selectedEventTemplate['_id']).subscribe((res :any) => {
-            this.setResetMessage(res.message,res.color);
-            this.eventsTemplates.splice(this.eventsTemplates.indexOf(this.selectedEventTemplate),1);
-        }, (err:any)=>{
+    deleteEventsTemplate() {
+        this.as.deleteEventsTemplate(this.selectedEventTemplate['_id']).subscribe((res: any) => {
+            this.setResetMessage(res.message, res.color);
+            this.eventsTemplates.splice(this.eventsTemplates.indexOf(this.selectedEventTemplate), 1);
+        }, (err: any) => {
 
-        } )
+        })
     }
 
     remainingTime() {
-        console.log(this.selectedEventTemplate);
         this.timeRemain = [];
         this.calendar.events = this.selectedEventTemplate['events'];
         this.calendar.renderEvents();
@@ -229,7 +232,6 @@ export class AdminComponent {
             }, 0)
             this.timeRemain.push({ duration: duration.toFixed(2), title: template.name.title, color: template.color });
         }
-        console.log(this.timeRemain);
     }
 
     push(array, value) {
@@ -260,16 +262,82 @@ export class AdminComponent {
         })
     }
 
-    setResetMessage(message,color){
+    setResetMessage(message, color) {
         this.responseColor = color;
         this.responseMessage = message;
-        setTimeout(()=>{
-          this.responseColor = "transparent";
-          this.responseMessage = "";
-        },2000);
+        setTimeout(() => {
+            this.responseColor = "transparent";
+            this.responseMessage = "";
+        }, 2000);
     }
 
-    func(i){
+    func(i) {
         console.log(this.users[i].showEventsTemplate);
+    }
+
+    sortEventsTemplate(...n) {
+
+        n[0].sort((a, b) => {
+            if (a[n[1]] > b[n[1]]) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+
+        console.log(n[0]);
+        var st = 0, ed = 0, array = [], temp = [];
+
+        for (let x = 0; x <= n[0].length; x++) {
+            console.log("st", st, " ", ed);
+            if (ed == n[0].length) {
+                temp.sort((a, b) => {
+                    if (a[n[2]] > b[n[2]]) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                });
+                console.log(temp);
+                array = array.concat(temp);
+            } else {
+
+                if (n[0][st]['address'] == n[0][ed]['address']) {
+                    temp.push(n[0][x]);
+                    ed++;
+                } else {
+                    console.log(st, " ", ed);
+                    temp.sort((a, b) => {
+                        if (a[n[2]] > b[n[2]]) {
+                            return 1;
+                        } else {
+                            return -1;
+                        }
+                    });
+                    console.log(temp);
+                    array = array.concat(temp);
+                    console.log(array);
+                    temp = [];
+                    st = ed;
+                    // ed++;
+                    x--;
+                }
+            }
+        }
+        return array;
+
+        // n[0].sort((a,b)=>{
+        //     if(a[n[1]] == b[n[1]]){
+        //       if(a[n[2]] > b[n[2]]){
+        //         return 1;
+        //       }else{
+        //         return -1;
+        //       }
+        //     } else{
+        //       return -1;
+        //     }
+        // });
+
+
     }
 }
