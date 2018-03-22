@@ -166,8 +166,14 @@ export class CalendarCustomComponent implements OnInit {
       if(id && id == event.id) continue;
       let start = new Date(event.start).getTime();
       let end = new Date(event.end).getTime();
-      console.log(start, ' ', end, ' ', st.getTime(), ' ', ed.getTime());
-      if ((st.getTime() >= start && st.getTime() < end) || (ed.getTime() > start && ed.getTime() <= end)) {
+      let s1 = st.toISOString();
+      let e1 = ed.toISOString();
+      let s = new Date(s1.substring(0,s1.indexOf('.')));
+      console.log(st.toISOString());
+      let e = new Date(e1.substring(0,e1.indexOf('.')));
+      console.log(start, ' ', end, ' ', event.start, ' ', event.end, s.getTime(), ' ', e.getTime(),' ', s, ' ', e);
+      if ((s.getTime() >= start && s.getTime() < end) || (e.getTime() > start && e.getTime() <= end)) {
+        
         this.setResetMessage("Du kan inte skapa event på varandra","red");
         return false;
       } else {
