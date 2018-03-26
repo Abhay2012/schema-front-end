@@ -164,22 +164,39 @@ export class CalendarCustomComponent implements OnInit {
   eventOverlapCheck(st, ed, id?) {
     for (let event of this.events) {
       if(id && id == event.id) continue;
-      let start = new Date(event.start).getTime();
+      let start = new Date(event.start).getDate();
       let end = new Date(event.end).getTime();
-      let s1 = st.toISOString();
-      let e1 = ed.toISOString();
-      let s = new Date(s1.substring(0,s1.indexOf('.')));
-      console.log(st.toISOString());
-      let e = new Date(e1.substring(0,e1.indexOf('.')));
-      console.log(start, ' ', end, ' ', event.start, ' ', event.end, s.getTime(), ' ', e.getTime(),' ', s, ' ', e);
-      if ((s.getTime() >= start && s.getTime() < end) || (e.getTime() > start && e.getTime() <= end)) {
-        
-        this.setResetMessage("Du kan inte skapa event på varandra","red");
-        return false;
-      } else {
-        this.responseMessage = "";
-        this.responseColor = "transparent";
+      let s1,e1;
+      if(id){
+        s1 = st.toISOString();
+        e1 = ed.toISOString();
+      }else{
+        s1 = (st.toISOString()).substring(0,(st.toISOString()).indexOf('T')+1) + st.toLocaleTimeString();
+        e1 = (ed.toISOString()).substring(0,(ed.toISOString()).indexOf('T')+1) + ed.toLocaleTimeString();
       }
+      
+      console.log((st.toISOString()).substring(0,(st.toISOString()).indexOf('T')+1) + st.toLocaleTimeString());
+      // let s = new Date(s1.substring(0,s1.indexOf('.')));
+      // console.log(st.toISOString());
+      // let e = new Date(e1.substring(0,e1.indexOf('.')));
+      // console.log(start, ' ', end, ' ', event.start, ' ', event.end, s.getTime(), ' ', e.getTime(),' ', s, ' ', e);
+      
+      if(start == st.getDate()){
+        let sold = parseInt(event.start.substring(event.start.indexOf('T')+1,event.start.indexOf(':'))) + (parseInt(event.start.substring(event.start.indexOf(':')+1,event.start.indexOf(':')+3))/60);
+        let snew = parseInt(s1.substring(s1.indexOf('T')+1,s1.indexOf(':'))) + (parseInt(s1.substring(s1.indexOf(':')+1,s1.indexOf(':')+3))/60)
+        let eold = parseInt(event.end.substring(event.end.indexOf('T')+1,event.end.indexOf(':'))) + (parseInt(event.end.substring(event.end.indexOf(':')+1,event.end.indexOf(':')+3))/60)
+        let enew = parseInt(e1.substring(e1.indexOf('T')+1,e1.indexOf(':'))) + (parseInt(e1.substring(e1.indexOf(':')+1,e1.indexOf(':')+3))/60)
+        console.log(sold,snew,eold,enew);
+        if ((snew >= sold && snew < eold) || (enew > sold && enew <= eold)) {
+          this.setResetMessage("Du kan inte skapa event på varandra","red");
+          return false;
+        } else {
+          this.responseMessage = "";
+          this.responseColor = "transparent";
+        }
+      }
+      
+      
     }
     return true;
   }

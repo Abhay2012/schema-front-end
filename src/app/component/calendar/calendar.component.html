@@ -17,7 +17,7 @@
                 <h4 class="modal-title">Skapa Aktivitet</h4>
             </div>
             <div class="modal-body">
-                <form #eventform=ngForm (submit)="createEvent(eventform)">
+                <form #eventform=ngForm >
                     <label for="title">Mallar</label>
                     <select class="form-control" required name="template" ngModel id="">
                         <option selected disabled value="">
@@ -55,7 +55,7 @@
                         </textarea>
 
                     <br>
-                    <input type="submit" class="btn btn-primary" [disabled]="eventform.invalid || (scs.selectedWeek.delName=='' && localStorage.username != 'admin') || eventform.value.startTime >= eventform.value.endTime"
+                    <input type="button" (click)="createEvent(eventform)" class="btn btn-primary" [disabled]="eventform.invalid || (scs.selectedWeek.delName=='' && localStorage.username != 'admin') || eventform.value.startTime >= eventform.value.endTime"
                         value="submit">
                     <p style="text-align:center" [style.color]="responseColor">{{responseMessage}}</p>
                     <!-- <p *ngIf="!already">{{alreadyessage}}</p> -->

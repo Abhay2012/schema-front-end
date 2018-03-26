@@ -48,8 +48,8 @@ export class UserComponent implements OnInit {
     getAdminPanel() {
         this.us.getAdminPanel().subscribe((res: any) => {
             for (let r of res) {
-                if (r._id == 'delName') this.delNames = this.delNames.concat(r.data[0].data);
-                else if (r._id == 'template') this.templates = r.data;
+                // if (r._id == 'delName') this.delNames = this.delNames.concat(r.data[0].data);
+                if (r._id == 'template') this.templates = r.data;
                 else if (r._id == 'ver') this.vers = r.data;
                 else if (r._id == 'spa') this.spas = r.data;
                 else if (r._id == 'weeks') this.weeks = r.data[0].data;
@@ -142,6 +142,9 @@ export class UserComponent implements OnInit {
             this.us.setSelectedWeek(this.scs.selectedWeek).subscribe((res: any) => {
                 this.setResetMessage(res.message, res.color)
                 this.scs.lock = false;
+                if(res.data.upserted){
+                    this.selectedWeekId = res.data.upserted[0]['_id'];
+                }
             }, (err: any) => {
 
             })
