@@ -174,19 +174,11 @@ export class CalendarCustomComponent implements OnInit {
         s1 = (st.toISOString()).substring(0,(st.toISOString()).indexOf('T')+1) + st.toLocaleTimeString();
         e1 = (ed.toISOString()).substring(0,(ed.toISOString()).indexOf('T')+1) + ed.toLocaleTimeString();
       }
-      
-      console.log((st.toISOString()).substring(0,(st.toISOString()).indexOf('T')+1) + st.toLocaleTimeString());
-      // let s = new Date(s1.substring(0,s1.indexOf('.')));
-      // console.log(st.toISOString());
-      // let e = new Date(e1.substring(0,e1.indexOf('.')));
-      // console.log(start, ' ', end, ' ', event.start, ' ', event.end, s.getTime(), ' ', e.getTime(),' ', s, ' ', e);
-      
       if(start == st.getDate()){
         let sold = parseInt(event.start.substring(event.start.indexOf('T')+1,event.start.indexOf(':'))) + (parseInt(event.start.substring(event.start.indexOf(':')+1,event.start.indexOf(':')+3))/60);
         let snew = parseInt(s1.substring(s1.indexOf('T')+1,s1.indexOf(':'))) + (parseInt(s1.substring(s1.indexOf(':')+1,s1.indexOf(':')+3))/60)
         let eold = parseInt(event.end.substring(event.end.indexOf('T')+1,event.end.indexOf(':'))) + (parseInt(event.end.substring(event.end.indexOf(':')+1,event.end.indexOf(':')+3))/60)
         let enew = parseInt(e1.substring(e1.indexOf('T')+1,e1.indexOf(':'))) + (parseInt(e1.substring(e1.indexOf(':')+1,e1.indexOf(':')+3))/60)
-        console.log(sold,snew,eold,enew);
         if ((snew >= sold && snew < eold) || (enew > sold && enew <= eold)) {
           this.setResetMessage("Du kan inte skapa event på varandra","red");
           return false;
@@ -345,6 +337,16 @@ export class CalendarCustomComponent implements OnInit {
   updateResizeDropEvents() {
     this.cs.updateResizeDropEvents(this.scs.selectedWeek.week, this.weekId, this.updateEvents).subscribe((res: any) => {
       this.setResetMessage(res.message, res.color) 
+      for(let event of this.events){
+        for(let ue of this.updateEvents){
+          if(event.id == ue.id){
+            event.start = ue.start;
+            event.end = ue.end;
+            event.data.duration = ue.duration;
+          }
+        } 
+      }   
+      this.updateEvents = [];
     }, (err: any) => {
 
     })

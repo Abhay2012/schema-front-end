@@ -34,8 +34,8 @@ export class UserComponent implements OnInit {
     constructor(private us: UserService, public scs: StaticContentService) {
         this.getAdminPanel();
         this.getUserData();
-        localStorage.setItem('copy_access', 'false');
-        localStorage.setItem('grant_access', 'false');
+        localStorage.setItem('copy_access', 'true');
+        localStorage.setItem('grant_access', 'true');
         this.localStorage = localStorage;
     }
 
@@ -106,7 +106,7 @@ export class UserComponent implements OnInit {
             if (res.exist) this.selectedWeekId = res.data[0]._id;
 
             this.scs.lock = !res.exist;
-            if (res.data[0] && res.data[0].spaBlock != '' && res.data[0].spaBlock != this.scs.selectedWeek.spaBlock) {
+            if (res.data[0] && res.data[0].spaBlock != '') {
                 this.scs.selectedWeek.spaBlock = res.data[0].spaBlock;
                 this.scs.selectedWeek.timmar = 0;
                 this.setTimmar();
@@ -263,22 +263,28 @@ export class UserComponent implements OnInit {
                 });
                 doc.addImage(img, 'JPEG', 20, 20, 400, 380);
                 doc.save(`${this.scs.selectedWeek.delName} v${this.scs.selectedWeek.week} schema.pdf`);
-                document.body.style.width = '100%';
-                document.body.style.height = '100%';
             }
         })
     }
 
 
     printLandscape() {
-        html2canvas(document.body, {
+        var doc = new jsPDF('l', 'mm', [297, 210]);
+        document.getElementById('pdfCanvas').style.backgroundColor = "white";
+        document.getElementById('info').style.backgroundColor = "white";
+        html2canvas(document.getElementById('info'), {
+            onrendered: (canvas) => {
+                let img = canvas.toDataURL('image/jpeg', 1.0);
+                doc.addImage(img, 'JPEG', 10, 10, 270, 100);
+            }
+        })
+        
+        html2canvas(document.getElementById('pdfCanvas'), {
             onrendered: (canvas) => {
                 var img = canvas.toDataURL('image/jpeg', 1.0);
-                var doc = new jsPDF('l', 'mm', [297, 210]);
-                doc.addImage(img, 'JPEG', 20, 20, 220, 180);
+                doc.addPage();
+                doc.addImage(img, 'JPEG', 10, 10, 270, 120);
                 doc.save(`${this.scs.selectedWeek.delName} v${this.scs.selectedWeek.week} schema.pdf`);
-                document.body.style.width = '100%';
-                document.body.style.height = '100%';
             }
         })
     }
